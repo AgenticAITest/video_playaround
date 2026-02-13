@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:docs.comfy.org)",
+      "WebFetch(domain:9elements.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.viewcomfy.com)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx shadcn@latest add button card dialog dropdown-menu input label select slider tabs textarea toast tooltip progress badge separator scroll-area skeleton switch sheet --yes)",
+      "Bash(npx shadcn@latest add button card dialog dropdown-menu input label select slider tabs textarea sonner tooltip progress badge separator scroll-area skeleton switch sheet --yes)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(dir:*)",
+      "Bash(powershell:*)",
+      "Bash(npx kill-port:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout:*)",
+      "Bash(del /q \"C:\\\\Users\\\\PC\\\\Desktop\\\\Claude_Coder\\\\video_playaround\\\\.next\\\\dev\\\\lock\")",
+      "Bash(node -e:*)",
+      "Bash(npx next dev:*)",
+      "Bash(findstr:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
