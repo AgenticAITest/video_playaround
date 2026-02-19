@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Search, LayoutGrid } from "lucide-react";
 import { WorkflowList } from "@/components/workflows/workflow-list";
-import { WorkflowUpload } from "@/components/workflows/workflow-upload";
+import { ImportWizard } from "@/components/workflows/import-wizard";
+import { WorkflowDiscover } from "@/components/workflows/workflow-discover";
+import { TemplateBrowser } from "@/components/workflows/template-browser";
 
 export default function WorkflowsPage() {
-  const [uploadOpen, setUploadOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -15,17 +18,44 @@ export default function WorkflowsPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Workflows</h2>
           <p className="text-muted-foreground">
-            Upload and manage your ComfyUI workflows
+            Discover, import, and manage your ComfyUI workflows
           </p>
         </div>
-        <Button onClick={() => setUploadOpen(true)}>
+        <Button onClick={() => setWizardOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Upload Workflow
+          Import Workflow
         </Button>
       </div>
 
-      <WorkflowList />
-      <WorkflowUpload open={uploadOpen} onOpenChange={setUploadOpen} />
+      <Tabs defaultValue="my-workflows">
+        <TabsList>
+          <TabsTrigger value="my-workflows">
+            My Workflows
+          </TabsTrigger>
+          <TabsTrigger value="discover" className="gap-1.5">
+            <Search className="h-3.5 w-3.5" />
+            Discover
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="gap-1.5">
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Templates
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="my-workflows" className="mt-4">
+          <WorkflowList />
+        </TabsContent>
+
+        <TabsContent value="discover" className="mt-4">
+          <WorkflowDiscover />
+        </TabsContent>
+
+        <TabsContent value="templates" className="mt-4">
+          <TemplateBrowser />
+        </TabsContent>
+      </Tabs>
+
+      <ImportWizard open={wizardOpen} onOpenChange={setWizardOpen} />
     </div>
   );
 }

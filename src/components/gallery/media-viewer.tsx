@@ -28,6 +28,9 @@ import {
   Image as ImageIcon,
   Film,
   PlayCircle,
+  Music,
+  ImagePlus,
+  Disc3,
 } from "lucide-react";
 import { formatDate, needsVideoElement } from "@/lib/utils";
 import { useSettingsStore } from "@/lib/store/settings-store";
@@ -37,16 +40,22 @@ interface MediaViewerProps {
   generation: GenerationRecord;
 }
 
-const modeIcons = {
+const modeIcons: Record<string, typeof ImageIcon> = {
   "text-to-image": ImageIcon,
+  "image-to-image": ImagePlus,
   "text-to-video": Film,
   "image-to-video": PlayCircle,
+  "text-to-music": Music,
+  "music-to-music": Disc3,
 };
 
-const modeLabels = {
+const modeLabels: Record<string, string> = {
   "text-to-image": "Text to Image",
+  "image-to-image": "Image to Image",
   "text-to-video": "Text to Video",
   "image-to-video": "Image to Video",
+  "text-to-music": "Text to Music",
+  "music-to-music": "Music to Music",
 };
 
 export function MediaViewer({ generation }: MediaViewerProps) {
@@ -67,10 +76,11 @@ export function MediaViewer({ generation }: MediaViewerProps) {
         subfolder: file.subfolder,
         type: file.type,
         comfyuiUrl,
+        generationId: generation.id,
       });
       return `/api/comfyui/view?${params.toString()}`;
     },
-    [comfyuiUrl]
+    [comfyuiUrl, generation.id]
   );
 
   const handleDownload = useCallback(

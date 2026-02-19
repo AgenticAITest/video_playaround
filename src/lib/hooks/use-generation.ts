@@ -111,11 +111,12 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
             status: "completed",
             outputFiles: outputs,
             completedAt: new Date().toISOString(),
+            comfyuiUrl: settings.comfyuiUrl,
           }),
         });
       }
     },
-    [generationId, clearPoll, closeSse]
+    [generationId, settings.comfyuiUrl, clearPoll, closeSse]
   );
 
   // Helper: handle error
@@ -145,7 +146,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
   );
 
   // Elapsed-time ticker + stall detection
-  const stallThreshold = mode === "text-to-image"
+  const stallThreshold = (mode === "text-to-image" || mode === "image-to-image")
     ? STALL_THRESHOLD_IMAGE_MS
     : STALL_THRESHOLD_VIDEO_MS;
 

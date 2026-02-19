@@ -14,8 +14,11 @@ export const DEFAULT_SETTINGS: AppSettings = {
 
 export const GENERATION_MODES = [
   { value: "text-to-image" as const, label: "Text to Image", icon: "Image" },
+  { value: "image-to-image" as const, label: "Image to Image", icon: "ImagePlus" },
   { value: "text-to-video" as const, label: "Text to Video", icon: "Film" },
   { value: "image-to-video" as const, label: "Image to Video", icon: "VideoIcon" },
+  { value: "text-to-music" as const, label: "Text to Music", icon: "Music" },
+  { value: "music-to-music" as const, label: "Music to Music", icon: "Disc3" },
 ] as const;
 
 export const RESOLUTION_PRESETS = [

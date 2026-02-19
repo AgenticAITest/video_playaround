@@ -12,10 +12,13 @@ interface GalleryCardProps {
   comfyuiUrl: string;
 }
 
-const modeLabels = {
+const modeLabels: Record<string, string> = {
   "text-to-image": "Txt2Img",
+  "image-to-image": "Img2Img",
   "text-to-video": "Txt2Vid",
   "image-to-video": "Img2Vid",
+  "text-to-music": "Txt2Mus",
+  "music-to-music": "Mus2Mus",
 };
 
 export function GalleryCard({ generation, comfyuiUrl }: GalleryCardProps) {
@@ -23,7 +26,7 @@ export function GalleryCard({ generation, comfyuiUrl }: GalleryCardProps) {
   const isVideo = firstOutput ? needsVideoElement(firstOutput.filename) : false;
 
   const thumbnailUrl = firstOutput
-    ? `/api/comfyui/view?filename=${encodeURIComponent(firstOutput.filename)}&subfolder=${encodeURIComponent(firstOutput.subfolder)}&type=${firstOutput.type}&comfyuiUrl=${encodeURIComponent(comfyuiUrl)}`
+    ? `/api/comfyui/view?filename=${encodeURIComponent(firstOutput.filename)}&subfolder=${encodeURIComponent(firstOutput.subfolder)}&type=${firstOutput.type}&comfyuiUrl=${encodeURIComponent(comfyuiUrl)}&generationId=${encodeURIComponent(generation.id)}`
     : null;
 
   return (

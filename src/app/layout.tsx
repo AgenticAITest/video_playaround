@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MediaGen - AI Image & Video Generator",
+  title: "Nimbus MediaGen - AI Image & Video Generator",
   description:
     "Generate images and videos using ComfyUI with AI-enhanced prompts from LM Studio",
 };

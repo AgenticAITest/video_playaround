@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import NextImage from "next/image";
 import {
   Home,
   Image,
@@ -10,8 +11,10 @@ import {
   LayoutGrid,
   Workflow,
   Settings,
-  Sparkles,
   ChevronLeft,
+  Music,
+  ImagePlus,
+  Disc3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,8 +29,11 @@ import { useState } from "react";
 const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/text-to-image", label: "Text to Image", icon: Image },
+  { href: "/image-to-image", label: "Image to Image", icon: ImagePlus },
   { href: "/text-to-video", label: "Text to Video", icon: Film },
   { href: "/image-to-video", label: "Image to Video", icon: PlayCircle },
+  { href: "/text-to-music", label: "Text to Music", icon: Music },
+  { href: "/music-to-music", label: "Music to Music", icon: Disc3 },
   { href: "/gallery", label: "Gallery", icon: LayoutGrid },
   { href: "/workflows", label: "Workflows", icon: Workflow },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -45,11 +51,17 @@ export function AppSidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2 px-4">
-        <Sparkles className="h-6 w-6 shrink-0 text-primary" />
+      <div className="flex h-16 items-center gap-3 px-3">
+        <NextImage
+          src="/logo.png"
+          alt="Nimbus MediaGen"
+          width={44}
+          height={44}
+          className="shrink-0 rounded-md"
+        />
         {!collapsed && (
           <span className="text-lg font-semibold tracking-tight">
-            MediaGen
+            Nimbus <span className="text-primary">MediaGen</span>
           </span>
         )}
       </div>

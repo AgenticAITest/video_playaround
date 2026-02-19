@@ -26,7 +26,30 @@
       "Bash(git init:*)",
       "Bash(git branch:*)",
       "Bash(git status:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh auth:*)",
+      "Bash(git config:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(where:*)",
+      "Bash(lms status:*)",
+      "Bash(lms server start:*)",
+      "Bash(\"C:\\\\Users\\\\PC\\\\Documents\\\\ComfyUI\\\\.venv\\\\Scripts\\\\python.exe\":*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:developer.civitai.com)",
+      "WebFetch(domain:comfy.icu)",
+      "Bash(npm run build:*)",
+      "Bash(curl:*)",
+      "Bash(ping:*)",
+      "Bash(tasklist:*)",
+      "Bash(netstat:*)",
+      "WebFetch(domain:localhost)",
+      "Bash(test:*)",
+      "Bash(\"C:\\\\Users\\\\PC\\\\Documents\\\\ComfyUI\\\\.venv\\\\Scripts\\\\python.exe\" \"C:\\\\Users\\\\PC\\\\AppData\\\\Local\\\\Programs\\\\@comfyorgcomfyui-electron\\\\resources\\\\ComfyUI\\\\main.py\" --listen 127.0.0.1 --port 8188 --extra-model-paths-config \"C:\\\\Users\\\\PC\\\\AppData\\\\Roaming\\\\ComfyUI\\\\extra_models_config.yaml\")",
+      "Bash(\"C:\\\\Users\\\\PC\\\\Documents\\\\ComfyUI\\\\.venv\\\\Scripts\\\\python.exe\" -m pip install -r \"C:\\\\Users\\\\PC\\\\AppData\\\\Local\\\\Programs\\\\@comfyorgcomfyui-electron\\\\resources\\\\ComfyUI\\\\requirements.txt\")",
+      "Bash(\"C:\\\\Users\\\\PC\\\\Documents\\\\ComfyUI\\\\.venv\\\\Scripts\\\\python.exe\" -m pip install comfyui-frontend-package)",
+      "Bash(\"C:\\\\Users\\\\PC\\\\Documents\\\\ComfyUI\\\\.venv\\\\Scripts\\\\python.exe\" \"C:\\\\Users\\\\PC\\\\AppData\\\\Local\\\\Programs\\\\@comfyorgcomfyui-electron\\\\resources\\\\ComfyUI\\\\main.py\" --listen 127.0.0.1 --port 8188 --output-directory \"C:\\\\Users\\\\PC\\\\Documents\\\\ComfyUI\\\\output\" --input-directory \"C:\\\\Users\\\\PC\\\\Documents\\\\ComfyUI\\\\input\" --extra-model-paths-config \"C:\\\\Users\\\\PC\\\\AppData\\\\Roaming\\\\ComfyUI\\\\extra_models_config.yaml\")"
     ]
   }
 }

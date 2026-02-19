@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Image, Film, PlayCircle, LayoutGrid } from "lucide-react";
+import { Image, Film, PlayCircle, LayoutGrid, Music, ImagePlus, Disc3 } from "lucide-react";
 import type { GenerationMode } from "@/types/generation";
 
 interface GalleryFiltersProps {
@@ -14,8 +14,11 @@ interface GalleryFiltersProps {
 const filters = [
   { mode: null, label: "All", icon: LayoutGrid },
   { mode: "text-to-image" as const, label: "Text to Image", icon: Image },
+  { mode: "image-to-image" as const, label: "Image to Image", icon: ImagePlus },
   { mode: "text-to-video" as const, label: "Text to Video", icon: Film },
   { mode: "image-to-video" as const, label: "Image to Video", icon: PlayCircle },
+  { mode: "text-to-music" as const, label: "Text to Music", icon: Music },
+  { mode: "music-to-music" as const, label: "Music to Music", icon: Disc3 },
 ];
 
 export function GalleryFilters({

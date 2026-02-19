@@ -14,6 +14,9 @@ import {
   Workflow,
   LayoutGrid,
   Activity,
+  Music,
+  ImagePlus,
+  Disc3,
 } from "lucide-react";
 import { countGenerations } from "@/lib/db/generations";
 import { listWorkflows } from "@/lib/db/workflows";
@@ -29,6 +32,12 @@ const quickLinks = [
     icon: Image,
   },
   {
+    href: "/image-to-image",
+    title: "Image to Image",
+    description: "Transform images with AI",
+    icon: ImagePlus,
+  },
+  {
     href: "/text-to-video",
     title: "Text to Video",
     description: "Generate videos from text descriptions",
@@ -39,6 +48,18 @@ const quickLinks = [
     title: "Image to Video",
     description: "Animate images into videos",
     icon: PlayCircle,
+  },
+  {
+    href: "/text-to-music",
+    title: "Text to Music",
+    description: "Generate music from text descriptions",
+    icon: Music,
+  },
+  {
+    href: "/music-to-music",
+    title: "Music to Music",
+    description: "Transform and remix music with AI",
+    icon: Disc3,
   },
   {
     href: "/workflows",
@@ -53,8 +74,11 @@ export const dynamic = "force-dynamic";
 export default function HomePage() {
   const totalGenerations = countGenerations();
   const txt2imgCount = countGenerations("text-to-image");
+  const img2imgCount = countGenerations("image-to-image");
   const txt2vidCount = countGenerations("text-to-video");
   const img2vidCount = countGenerations("image-to-video");
+  const txt2musCount = countGenerations("text-to-music");
+  const mus2musCount = countGenerations("music-to-music");
   const workflows = listWorkflows();
   const recentGenerations = listGenerations({ limit: 6 });
 
@@ -63,7 +87,7 @@ export default function HomePage() {
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold tracking-tight">
-          Welcome to MediaGen
+          Welcome to Nimbus MediaGen
         </h2>
         <p className="mt-2 text-muted-foreground">
           AI-powered image and video generation using ComfyUI and LM Studio.
@@ -112,7 +136,7 @@ export default function HomePage() {
               <Image className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{txt2imgCount}</p>
+              <p className="text-2xl font-bold">{txt2imgCount + img2imgCount}</p>
               <p className="text-xs text-muted-foreground">Images</p>
             </div>
           </CardContent>
@@ -127,6 +151,19 @@ export default function HomePage() {
                 {txt2vidCount + img2vidCount}
               </p>
               <p className="text-xs text-muted-foreground">Videos</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4 pt-6">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Music className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">
+                {txt2musCount + mus2musCount}
+              </p>
+              <p className="text-xs text-muted-foreground">Music</p>
             </div>
           </CardContent>
         </Card>
@@ -161,13 +198,18 @@ export default function HomePage() {
                 <Card className="transition-colors hover:bg-accent/30">
                   <CardContent className="flex items-start gap-3 pt-4">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary/10">
-                      {gen.mode === "text-to-image" ? (
-                        <Image className="h-4 w-4 text-primary" />
-                      ) : gen.mode === "text-to-video" ? (
-                        <Film className="h-4 w-4 text-primary" />
-                      ) : (
-                        <PlayCircle className="h-4 w-4 text-primary" />
-                      )}
+                      {(() => {
+                        const icons: Record<string, typeof Image> = {
+                          "text-to-image": Image,
+                          "image-to-image": ImagePlus,
+                          "text-to-video": Film,
+                          "image-to-video": PlayCircle,
+                          "text-to-music": Music,
+                          "music-to-music": Disc3,
+                        };
+                        const Icon = icons[gen.mode] || Image;
+                        return <Icon className="h-4 w-4 text-primary" />;
+                      })()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm leading-snug line-clamp-2">

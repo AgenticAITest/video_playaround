@@ -6,8 +6,11 @@ import { Separator } from "@/components/ui/separator";
 const pageTitles: Record<string, string> = {
   "/": "Dashboard",
   "/text-to-image": "Text to Image",
+  "/image-to-image": "Image to Image",
   "/text-to-video": "Text to Video",
   "/image-to-video": "Image to Video",
+  "/text-to-music": "Text to Music",
+  "/music-to-music": "Music to Music",
   "/gallery": "Gallery",
   "/workflows": "Workflows",
   "/settings": "Settings",
@@ -22,7 +25,7 @@ export function Header() {
       ? "Generation Details"
       : pathname.startsWith("/workflows/")
         ? "Workflow Editor"
-        : "MediaGen");
+        : "Nimbus MediaGen");
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border px-6">
@@ -45,6 +48,12 @@ function getSubtitle(pathname: string): string {
       return "Generate videos from text descriptions";
     case "/image-to-video":
       return "Animate images into videos";
+    case "/text-to-music":
+      return "Generate music from text descriptions";
+    case "/image-to-image":
+      return "Transform images with AI";
+    case "/music-to-music":
+      return "Transform and remix music with AI";
     case "/gallery":
       return "Browse your past generations";
     case "/workflows":

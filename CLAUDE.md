@@ -12,9 +12,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev      # Start dev server on localhost:3000
 npm run build    # Production build
 npm run lint     # ESLint
+dev-all.bat      # Windows: launches LM Studio, ComfyUI, and Next.js together
 ```
 
 No test framework is configured. The SQLite database (`/data/mediagen.db`) auto-initializes on first run via `getDb()` in `src/lib/db/index.ts`.
+
+### Default Service URLs
+- **LM Studio:** `http://localhost:1234` (OpenAI-compatible API)
+- **ComfyUI:** `http://localhost:8188` (REST + WebSocket)
+- No `.env` files — URLs and settings are persisted to localStorage via Zustand store
 
 ## Architecture
 
@@ -63,6 +69,28 @@ When uploading ComfyUI workflow JSON (`workflow-utils.ts`), node types are scann
 - `EmptyLatentImage` → width, height
 - `LoadImage` → image_upload
 - `SaveImage`/`PreviewImage` → output node (image); `SaveAnimatedWebP`/`VHS_VideoCombine` → output node (video)
+
+### Workflow Templates
+Pre-built workflow templates in `src/lib/templates/index.ts` (e.g., SDXL, Flux.1) with difficulty levels, example use cases, required models, and pre-mapped inputs. Exported as `WORKFLOW_TEMPLATES`.
+
+### Real-time Progress
+- WebSocket provides node execution events and percentage progress; SSE also used
+- Fallback: HTTP polling `/api/comfyui/history/[promptId]` every 3s when WebSocket unavailable
+- Stall detection: 5 min timeout for images, 15 min for video
+- Live preview blobs streamed from WebSocket; queue tracking via `queueRemaining`
+
+### Image-to-Video Flow
+Requires uploading an image to ComfyUI's `/upload/image` endpoint first. The returned `inputImageFilename` is stored in the generation record and injected into the `image_upload` input mapping.
+
+### API Response Conventions
+- API routes return JSON; errors use `{ error: string }` shape
+- Status codes: 201 for create, 404 for not found, 500 for server errors
+- List endpoints accept query params: `mode`, `limit`, `offset`, `category`
+
+### Error Handling
+- Root error boundary in `src/app/error.tsx` with reset
+- Client-side feedback via `sonner` toast notifications
+- WebSocket reconnection uses exponential backoff (max 10 attempts)
 
 ### Server Config
 `next.config.ts` marks `better-sqlite3` and `ws` as `serverExternalPackages` to prevent client bundling. Image remote patterns allow localhost:8188 (ComfyUI).

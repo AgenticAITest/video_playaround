@@ -10,6 +10,7 @@ import { PromptInput } from "./prompt-input";
 import { WorkflowSelector } from "./workflow-selector";
 import { GenerationParamsPanel } from "./generation-params";
 import { ImageUploader } from "./image-uploader";
+import { AudioUploader } from "./audio-uploader";
 import { ProgressDisplay } from "./progress-display";
 import { OutputDisplay } from "./output-display";
 import { useGeneration } from "@/lib/hooks/use-generation";
@@ -32,6 +33,9 @@ export function GenerationForm({ mode }: GenerationFormProps) {
   const [selectedWorkflow, setSelectedWorkflow] =
     useState<WorkflowConfig | null>(null);
   const [inputImageFilename, setInputImageFilename] = useState<string | null>(
+    null
+  );
+  const [inputAudioFilename, setInputAudioFilename] = useState<string | null>(
     null
   );
   const [params, setParams] = useState<GenerationParams>({
@@ -106,7 +110,7 @@ export function GenerationForm({ mode }: GenerationFormProps) {
       prompt,
       negativePrompt,
       params,
-      inputImageFilename: inputImageFilename || undefined,
+      inputImageFilename: inputImageFilename || inputAudioFilename || undefined,
     });
   }, [
     selectedWorkflow,
@@ -114,6 +118,7 @@ export function GenerationForm({ mode }: GenerationFormProps) {
     negativePrompt,
     params,
     inputImageFilename,
+    inputAudioFilename,
     gen,
   ]);
 
@@ -142,14 +147,28 @@ export function GenerationForm({ mode }: GenerationFormProps) {
           </CardContent>
         </Card>
 
-        {/* Image uploader for image-to-video */}
-        {mode === "image-to-video" && (
+        {/* Image uploader for image-based input modes */}
+        {(mode === "image-to-video" || mode === "image-to-image") && (
           <Card>
             <CardContent className="pt-6">
               <ImageUploader
                 uploadedFilename={inputImageFilename}
                 onUpload={setInputImageFilename}
                 onRemove={() => setInputImageFilename(null)}
+                disabled={isGenerating}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Audio uploader for music-to-music */}
+        {mode === "music-to-music" && (
+          <Card>
+            <CardContent className="pt-6">
+              <AudioUploader
+                uploadedFilename={inputAudioFilename}
+                onUpload={setInputAudioFilename}
+                onRemove={() => setInputAudioFilename(null)}
                 disabled={isGenerating}
               />
             </CardContent>

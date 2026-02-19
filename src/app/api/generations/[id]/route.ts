@@ -4,6 +4,10 @@ import {
   updateGeneration,
   deleteGeneration,
 } from "@/lib/db/generations";
+import {
+  eagerCacheOutputFiles,
+  deleteCachedFiles,
+} from "@/lib/cache/file-cache";
 
 export async function GET(
   _request: NextRequest,
@@ -45,6 +49,11 @@ export async function PATCH(
       );
     }
 
+    // Eager-cache output files on completion (fire-and-forget)
+    if (body.status === "completed" && body.outputFiles?.length && body.comfyuiUrl) {
+      eagerCacheOutputFiles(id, body.outputFiles, body.comfyuiUrl).catch(() => {});
+    }
+
     return NextResponse.json(updated);
   } catch (error) {
     const message =
@@ -67,6 +76,9 @@ export async function DELETE(
         { status: 404 }
       );
     }
+
+    // Clean up cached output files from disk
+    deleteCachedFiles(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
