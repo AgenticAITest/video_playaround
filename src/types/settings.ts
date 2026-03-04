@@ -1,6 +1,8 @@
 export interface AppSettings {
-  lmStudioUrl: string;
-  lmStudioModel: string;
+  openRouterApiKey: string;
+  openRouterModel: string;
+  ngrokAuthToken: string;
+  ngrokDomain: string;
   comfyuiUrl: string;
   defaultWidth: number;
   defaultHeight: number;

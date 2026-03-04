@@ -3,17 +3,20 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Loader2, Server } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, Server, Globe } from "lucide-react";
 import { useSettingsStore } from "@/lib/store/settings-store";
 
 type ConnStatus = "checking" | "connected" | "disconnected";
+type NgrokPhase = "checking" | "active" | "inactive";
 
 export function DashboardStatus() {
   const settings = useSettingsStore();
   const [comfyStatus, setComfyStatus] = useState<ConnStatus>("checking");
-  const [lmStatus, setLmStatus] = useState<ConnStatus>("checking");
+  const [orStatus, setOrStatus] = useState<ConnStatus>("checking");
   const [comfyLatency, setComfyLatency] = useState<number | null>(null);
-  const [lmLatency, setLmLatency] = useState<number | null>(null);
+  const [orLatency, setOrLatency] = useState<number | null>(null);
+  const [ngrokPhase, setNgrokPhase] = useState<NgrokPhase>("checking");
+  const [ngrokUrl, setNgrokUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const checkComfy = async () => {
@@ -29,25 +32,37 @@ export function DashboardStatus() {
       }
     };
 
-    const checkLm = async () => {
+    const checkOr = async () => {
       try {
         const res = await fetch(
-          `/api/lmstudio/status?url=${encodeURIComponent(settings.lmStudioUrl)}`
+          `/api/openrouter/status?url=${encodeURIComponent(settings.openRouterApiKey)}`
         );
         const data = await res.json();
-        setLmStatus(data.connected ? "connected" : "disconnected");
-        if (data.latency) setLmLatency(data.latency);
+        setOrStatus(data.connected ? "connected" : "disconnected");
+        if (data.latency) setOrLatency(data.latency);
       } catch {
-        setLmStatus("disconnected");
+        setOrStatus("disconnected");
+      }
+    };
+
+    const checkNgrok = async () => {
+      try {
+        const res = await fetch("/api/ngrok/status");
+        const data = await res.json();
+        setNgrokPhase(data.active ? "active" : "inactive");
+        setNgrokUrl(data.url ?? null);
+      } catch {
+        setNgrokPhase("inactive");
       }
     };
 
     checkComfy();
-    checkLm();
-  }, [settings.comfyuiUrl, settings.lmStudioUrl]);
+    checkOr();
+    checkNgrok();
+  }, [settings.comfyuiUrl, settings.openRouterApiKey]);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       <Card>
         <CardContent className="flex items-center gap-3 pt-4 pb-4">
           <Server className="h-5 w-5 text-muted-foreground" />
@@ -64,12 +79,28 @@ export function DashboardStatus() {
         <CardContent className="flex items-center gap-3 pt-4 pb-4">
           <Server className="h-5 w-5 text-muted-foreground" />
           <div className="flex-1">
-            <p className="text-sm font-medium">LM Studio</p>
+            <p className="text-sm font-medium">OpenRouter</p>
             <p className="text-xs text-muted-foreground truncate">
-              {settings.lmStudioUrl}
+              {settings.openRouterApiKey ? "API Key Set" : "API Key Missing"}
             </p>
           </div>
-          <StatusBadge status={lmStatus} latency={lmLatency} />
+          <StatusBadge status={orStatus} latency={orLatency} />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="flex items-center gap-3 pt-4 pb-4">
+          <Globe className="h-5 w-5 text-muted-foreground" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">Ngrok Tunnel</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {ngrokPhase === "active" && ngrokUrl
+                ? ngrokUrl
+                : settings.ngrokAuthToken
+                  ? "Token set — tunnel inactive"
+                  : "Not configured"}
+            </p>
+          </div>
+          <NgrokBadge phase={ngrokPhase} />
         </CardContent>
       </Card>
     </div>
@@ -111,6 +142,36 @@ function StatusBadge({
     >
       <XCircle className="h-3 w-3" />
       Offline
+    </Badge>
+  );
+}
+
+function NgrokBadge({ phase }: { phase: NgrokPhase }) {
+  if (phase === "checking") {
+    return (
+      <Badge variant="outline" className="gap-1 text-xs">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Checking
+      </Badge>
+    );
+  }
+
+  if (phase === "active") {
+    return (
+      <Badge
+        variant="outline"
+        className="gap-1 border-green-500/50 text-green-500 text-xs"
+      >
+        <CheckCircle2 className="h-3 w-3" />
+        Active
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge variant="outline" className="gap-1 text-muted-foreground text-xs">
+      <XCircle className="h-3 w-3" />
+      Inactive
     </Badge>
   );
 }

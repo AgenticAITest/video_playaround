@@ -1,8 +1,10 @@
 import type { AppSettings } from "@/types/settings";
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  lmStudioUrl: "http://localhost:1234",
-  lmStudioModel: "",
+  openRouterApiKey: "",
+  openRouterModel: "google/gemini-2.5-flash",
+  ngrokAuthToken: "",
+  ngrokDomain: "",
   comfyuiUrl: "http://localhost:8188",
   defaultWidth: 1024,
   defaultHeight: 1024,

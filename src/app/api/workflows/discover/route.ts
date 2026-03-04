@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LMStudioClient } from "@/lib/lmstudio/client";
+import { OpenRouterClient } from "@/lib/openrouter/client";
 
 const WORKFLOW_RECOMMEND_SYSTEM_PROMPT = `You are a ComfyUI expert helping a user find the right workflow for their needs. The user will describe what they want to create.
 
@@ -40,9 +40,9 @@ Guidelines:
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { description, lmStudioUrl, model } = body as {
+    const { description, openRouterApiKey, model } = body as {
       description: string;
-      lmStudioUrl?: string;
+      openRouterApiKey?: string;
       model?: string;
     };
 
@@ -53,12 +53,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = new LMStudioClient(
-      lmStudioUrl || "http://localhost:1234"
-    );
+    if (!openRouterApiKey) {
+      return NextResponse.json(
+        { error: "OpenRouter API key is required" },
+        { status: 401 }
+      );
+    }
+
+    const client = new OpenRouterClient(openRouterApiKey);
 
     const response = await client.chatCompletion({
-      model: model || "",
+      model: model || "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: WORKFLOW_RECOMMEND_SYSTEM_PROMPT },
         {
@@ -75,15 +80,16 @@ export async function POST(request: NextRequest) {
     if (!content) {
       return NextResponse.json({
         recommendations: null,
-        error: "No response from LM Studio",
+        error: "No response from OpenRouter",
       });
     }
 
     try {
-      const parsed = JSON.parse(content);
+      // Strip markdown code blocks if the LLM included them
+      const cleanContent = content.replace(/^`+json\s*/, '').replace(/`+$/, '').trim();
+      const parsed = JSON.parse(cleanContent);
       return NextResponse.json(parsed);
     } catch {
-      // If LM Studio returns non-JSON, wrap it
       return NextResponse.json({
         recommendations: [],
         searchSuggestions: [],
@@ -91,8 +97,7 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { recommendations: null, error: message },
       { status: 503 }

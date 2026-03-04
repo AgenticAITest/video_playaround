@@ -341,8 +341,8 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
       const result = await enhance(
         prompt,
         mode,
-        settings.lmStudioUrl,
-        settings.lmStudioModel || undefined
+        settings.openRouterApiKey,
+        settings.openRouterModel || undefined
       );
       if (result) {
         setEnhancedPrompt(result);
@@ -352,7 +352,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
       setElapsedMs(0);
       return result;
     },
-    [enhance, mode, settings.lmStudioUrl, settings.lmStudioModel]
+    [enhance, mode, settings.openRouterApiKey, settings.openRouterModel]
   );
 
   const generate = useCallback(

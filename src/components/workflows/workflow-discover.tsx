@@ -48,7 +48,7 @@ const difficultyColor: Record<string, string> = {
 };
 
 export function WorkflowDiscover() {
-  const { lmStudioUrl, lmStudioModel } = useSettingsStore();
+  const { openRouterApiKey, openRouterModel } = useSettingsStore();
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [result, setResult] = useState<DiscoverResult | null>(null);
@@ -66,8 +66,8 @@ export function WorkflowDiscover() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           description: query.trim(),
-          lmStudioUrl,
-          model: lmStudioModel,
+          openRouterApiKey,
+          model: openRouterModel,
         }),
       });
 
@@ -86,12 +86,12 @@ export function WorkflowDiscover() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to search. Make sure LM Studio is running."
+          : "Failed to search. Make sure OpenRouter key is set."
       );
     } finally {
       setSearching(false);
     }
-  }, [query, lmStudioUrl, lmStudioModel]);
+  }, [query, openRouterApiKey, openRouterModel]);
 
   return (
     <div className="space-y-6">
@@ -150,7 +150,7 @@ export function WorkflowDiscover() {
           <div>
             <p>{error}</p>
             <p className="text-xs mt-1">
-              Make sure LM Studio is running with a model loaded.
+              Make sure your OpenRouter API key is valid.
             </p>
           </div>
         </div>
