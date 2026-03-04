@@ -41,8 +41,10 @@ interface UseGenerationResult {
     negativePrompt?: string;
     params: GenerationParams;
     inputImageFilenames?: Record<string, string>;
+    inputAudioFilename?: string | null;
   }) => Promise<void>;
   enhancePrompt: (prompt: string) => Promise<string | null>;
+  generateLyrics: (tags: string, duration?: number) => Promise<string | null>;
   cancel: () => Promise<void>;
   reset: () => void;
 }
@@ -355,6 +357,26 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
     [enhance, mode, settings.openRouterApiKey, settings.openRouterModel]
   );
 
+  const generateLyrics = useCallback(
+    async (tags: string, duration?: number) => {
+      setStatus("enhancing");
+      setStartedAt(Date.now());
+      const result = await enhance(
+        tags,
+        mode,
+        settings.openRouterApiKey,
+        settings.openRouterModel || undefined,
+        "lyrics",
+        duration
+      );
+      setStatus("idle");
+      setStartedAt(null);
+      setElapsedMs(0);
+      return result;
+    },
+    [enhance, mode, settings.openRouterApiKey, settings.openRouterModel]
+  );
+
   const generate = useCallback(
     async (opts: {
       workflowId: string;
@@ -362,6 +384,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
       negativePrompt?: string;
       params: GenerationParams;
       inputImageFilenames?: Record<string, string>;
+      inputAudioFilename?: string | null;
     }) => {
       completedRef.current = false;
       lastActivityRef.current = null;
@@ -389,6 +412,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
             enhancedPrompt: enhancedPrompt,
             params: opts.params,
             inputImageFilenames: opts.inputImageFilenames,
+            inputAudioFilename: opts.inputAudioFilename,
             comfyuiUrl: settings.comfyuiUrl,
           }),
         });
@@ -477,6 +501,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
     stalled,
     generate,
     enhancePrompt,
+    generateLyrics,
     cancel,
     reset,
   };

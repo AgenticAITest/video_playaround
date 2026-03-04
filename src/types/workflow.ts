@@ -1,9 +1,10 @@
-export type WorkflowCategory = "text-to-image" | "text-to-video" | "image-to-video" | "image-to-image";
+export type WorkflowCategory = "text-to-image" | "text-to-video" | "image-to-video" | "image-to-image" | "text-to-music" | "music-to-music";
 
 export type InputUIType =
   | "prompt"
   | "negative_prompt"
   | "image_upload"
+  | "audio_upload"
   | "width"
   | "height"
   | "steps"
@@ -12,6 +13,11 @@ export type InputUIType =
   | "sampler"
   | "scheduler"
   | "checkpoint"
+  | "music_tags"
+  | "music_duration"
+  | "music_bpm"
+  | "music_key"
+  | "music_time_sig"
   | "custom";
 
 export interface InputMapping {

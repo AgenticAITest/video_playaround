@@ -79,13 +79,18 @@ export function GenerationParamsPanel({
 
   // If no mappings at all (vaguely relevant to parameters), show nothing
   const relevantMappings = mappings.filter(
-    (m) => !["prompt", "negative_prompt", "image_upload"].includes(m.uiType)
+    (m) => !["prompt", "negative_prompt", "image_upload", "audio_upload", "music_tags", "music_duration", "music_bpm", "music_key", "music_time_sig"].includes(m.uiType)
   );
   if (relevantMappings.length === 0) {
     return null;
   }
 
   const customMappings = mappings.filter((m) => m.uiType === "custom");
+  const musicTagsMappings = mappings.filter((m) => m.uiType === "music_tags");
+  const musicDurationMappings = mappings.filter((m) => m.uiType === "music_duration");
+  const musicBpmMappings = mappings.filter((m) => m.uiType === "music_bpm");
+  const musicKeyMappings = mappings.filter((m) => m.uiType === "music_key");
+  const musicTimeSigMappings = mappings.filter((m) => m.uiType === "music_time_sig");
 
   return (
     <div className="space-y-4">
@@ -192,6 +197,86 @@ export function GenerationParamsPanel({
           </div>
         </div>
       )}
+
+      {/* Music Tags */}
+      {musicTagsMappings.map((mapping) => (
+        <div key={`${mapping.nodeId}.${mapping.fieldName}`} className="space-y-1">
+          <Label className="text-xs">{mapping.label}</Label>
+          <Input
+            value={String(params[mapping.fieldName] ?? mapping.defaultValue ?? "")}
+            onChange={(e) =>
+              update({ [mapping.fieldName]: e.target.value })
+            }
+            disabled={disabled}
+            className="h-8 text-sm"
+            placeholder="e.g. cinematic, upbeat, piano..."
+          />
+        </div>
+      ))}
+
+      {/* Music Duration */}
+      {musicDurationMappings.map((mapping) => (
+        <div key={`${mapping.nodeId}.${mapping.fieldName}`} className="space-y-1">
+          <Label className="text-xs">{mapping.label}</Label>
+          <Input
+            type="number"
+            value={Number(params[mapping.fieldName] ?? mapping.defaultValue ?? 10)}
+            onChange={(e) =>
+              update({ [mapping.fieldName]: parseFloat(e.target.value) || 0 })
+            }
+            disabled={disabled}
+            className="h-8 text-sm"
+          />
+        </div>
+      ))}
+
+      {/* Music BPM */}
+      {musicBpmMappings.map((mapping) => (
+        <div key={`${mapping.nodeId}.${mapping.fieldName}`} className="space-y-1">
+          <Label className="text-xs">{mapping.label}</Label>
+          <Input
+            type="number"
+            value={Number(params[mapping.fieldName] ?? mapping.defaultValue ?? 120)}
+            onChange={(e) =>
+              update({ [mapping.fieldName]: parseInt(e.target.value) || 0 })
+            }
+            disabled={disabled}
+            className="h-8 text-sm"
+          />
+        </div>
+      ))}
+
+      {/* Music Key/Time Sig */}
+      <div className="grid grid-cols-2 gap-3">
+        {musicKeyMappings.map((mapping) => (
+          <div key={`${mapping.nodeId}.${mapping.fieldName}`} className="space-y-1">
+            <Label className="text-xs">{mapping.label}</Label>
+            <Input
+              value={String(params[mapping.fieldName] ?? mapping.defaultValue ?? "C Major")}
+              onChange={(e) =>
+                update({ [mapping.fieldName]: e.target.value })
+              }
+              disabled={disabled}
+              className="h-8 text-sm"
+              placeholder="e.g. C Major"
+            />
+          </div>
+        ))}
+        {musicTimeSigMappings.map((mapping) => (
+          <div key={`${mapping.nodeId}.${mapping.fieldName}`} className="space-y-1">
+            <Label className="text-xs">{mapping.label}</Label>
+            <Input
+              value={String(params[mapping.fieldName] ?? mapping.defaultValue ?? "4/4")}
+              onChange={(e) =>
+                update({ [mapping.fieldName]: e.target.value })
+              }
+              disabled={disabled}
+              className="h-8 text-sm"
+              placeholder="e.g. 4/4"
+            />
+          </div>
+        ))}
+      </div>
 
       {/* Custom Inputs */}
       {customMappings.map((mapping) => (

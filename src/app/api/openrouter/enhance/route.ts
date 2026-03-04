@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { OpenRouterClient } from "@/lib/openrouter/client";
-import { getSystemPrompt } from "@/lib/lmstudio/prompts";
+import { getSystemPrompt, PROMPT_GENERATE_LYRICS } from "@/lib/lmstudio/prompts";
 import type { GenerationMode } from "@/types/generation";
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { prompt, mode, openRouterApiKey, model } = body as {
+        const { prompt, mode, openRouterApiKey, model, intent = "enhance", duration } = body as {
             prompt: string;
             mode: GenerationMode;
             openRouterApiKey?: string;
             model?: string;
+            intent?: "enhance" | "lyrics";
+            duration?: number;
         };
 
         if (!prompt || !mode) {
@@ -29,13 +31,18 @@ export async function POST(request: NextRequest) {
 
         const client = new OpenRouterClient(openRouterApiKey);
 
-        const systemPrompt = getSystemPrompt(mode);
+        const systemPrompt = intent === "lyrics" ? PROMPT_GENERATE_LYRICS : getSystemPrompt(mode);
+        let userPrompt = prompt;
+
+        if (intent === "lyrics" && duration) {
+            userPrompt = `Style Tags: ${prompt}\nTarget Duration: ${duration} seconds`;
+        }
 
         const response = await client.chatCompletion({
             model: model || "google/gemini-2.5-flash",
             messages: [
                 { role: "system", content: systemPrompt },
-                { role: "user", content: prompt },
+                { role: "user", content: userPrompt },
             ],
             temperature: 0.7,
             max_tokens: 500,

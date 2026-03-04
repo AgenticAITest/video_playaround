@@ -695,6 +695,8 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
                     <SelectItem value="image-to-image">Image to Image</SelectItem>
                     <SelectItem value="text-to-video">Text to Video</SelectItem>
                     <SelectItem value="image-to-video">Image to Video</SelectItem>
+                    <SelectItem value="text-to-music">Text to Music</SelectItem>
+                    <SelectItem value="music-to-music">Music to Music</SelectItem>
                   </SelectContent>
                 </Select>
                 {analysis?.suggestedCategory && (

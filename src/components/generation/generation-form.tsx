@@ -92,6 +92,11 @@ export function GenerationForm({ mode }: GenerationFormProps) {
             setInputImageFilenames((prev) => ({ ...prev, [key]: String(val) }));
           }
           break;
+        case "audio_upload":
+          if (val) {
+            setInputAudioFilename(String(val));
+          }
+          break;
       }
     }
   }, [prompt, negativePrompt]);
@@ -121,6 +126,19 @@ export function GenerationForm({ mode }: GenerationFormProps) {
     await gen.enhancePrompt(prompt);
   }, [prompt, gen]);
 
+  const handleGenerateLyrics = useCallback(async () => {
+    if (!prompt.trim()) return;
+
+    // Find the duration value from params if it exists
+    const durationMapping = selectedWorkflow?.inputMappings.find(m => m.uiType === "music_duration");
+    const duration = durationMapping ? Number(params[durationMapping.fieldName]) : undefined;
+
+    const lyrics = await gen.generateLyrics(prompt, duration);
+    if (lyrics) {
+      setNegativePrompt(lyrics);
+    }
+  }, [prompt, gen, selectedWorkflow, params]);
+
   const handleGenerate = useCallback(async () => {
     if (!selectedWorkflow || !prompt.trim()) return;
 
@@ -130,6 +148,7 @@ export function GenerationForm({ mode }: GenerationFormProps) {
       negativePrompt,
       params,
       inputImageFilenames,
+      inputAudioFilename,
     });
   }, [
     selectedWorkflow,
@@ -156,10 +175,16 @@ export function GenerationForm({ mode }: GenerationFormProps) {
               onPromptChange={setPrompt}
               negativePrompt={negativePrompt}
               onNegativePromptChange={setNegativePrompt}
+              promptLabel={mode.includes("music") ? "Tags" : "Prompt"}
+              negativePromptLabel={mode.includes("music") ? "Lyrics" : "Negative Prompt"}
+              promptPlaceholder={mode.includes("music") ? "e.g. cinematic, upbeat, piano..." : "Describe what you want to generate..."}
+              negativePromptPlaceholder={mode.includes("music") ? "Enter lyrics here (optional)..." : "What to avoid in the generation..."}
               enhancedPrompt={gen.enhancedPrompt}
               onEnhance={handleEnhance}
               onClearEnhanced={() => gen.reset()}
-              enhancing={gen.enhancing}
+              onGenerateLyrics={mode.includes("music") ? handleGenerateLyrics : undefined}
+              enhancing={gen.enhancing && !gen.stalled}
+              generatingLyrics={gen.enhancing && mode.includes("music")}
               disabled={isGenerating}
             />
           </CardContent>

@@ -53,6 +53,10 @@ const MIME_MAP: Record<string, string> = {
   ".gif": "image/gif",
   ".mp4": "video/mp4",
   ".webm": "video/webm",
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".flac": "audio/flac",
+  ".ogg": "audio/ogg",
 };
 
 /** Map filename extension to MIME type */

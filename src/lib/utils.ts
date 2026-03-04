@@ -29,3 +29,11 @@ export function needsVideoElement(filename: string): boolean {
   const ext = filename.split(".").pop()?.toLowerCase() || "";
   return ["mp4", "webm", "avi", "mov", "mkv"].includes(ext);
 }
+
+/**
+ * Whether a file needs an <audio> element.
+ */
+export function needsAudioElement(filename: string): boolean {
+  const ext = filename.split(".").pop()?.toLowerCase() || "";
+  return ["mp3", "wav", "flac", "ogg", "m4a"].includes(ext);
+}

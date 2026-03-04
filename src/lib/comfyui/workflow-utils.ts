@@ -268,6 +268,74 @@ export function autoDetectMappings(
         });
       }
     }
+
+    // LoadAudio -> audio_upload
+    if (classType === "LoadAudio" || classType === "VHS_LoadAudio") {
+      if ("audio" in node.inputs) {
+        mappings.push({
+          nodeId,
+          fieldName: "audio",
+          uiType: "audio_upload",
+          label: "Input Audio",
+          defaultValue: "",
+        });
+      }
+    }
+
+    // Music tags detection
+    const isMusicNode = classType.toLowerCase().includes("music") ||
+      classType.toLowerCase().includes("audio") ||
+      classType.toLowerCase().includes("cassette");
+
+    if (isMusicNode) {
+      for (const [key, value] of Object.entries(node.inputs)) {
+        const lowerKey = key.toLowerCase();
+        let uiType: InputUIType | null = null;
+        let label = "";
+
+        // String-based parameters
+        if (typeof value === "string") {
+          if (lowerKey === "tags" || lowerKey === "music_tags" || lowerKey === "style") {
+            uiType = "prompt";
+            label = "Tags";
+          } else if (lowerKey === "lyrics") {
+            uiType = "negative_prompt";
+            label = "Lyrics";
+          } else if (lowerKey === "key" || lowerKey === "musical_key" || lowerKey === "keyscale") {
+            uiType = "music_key";
+            label = "Musical Key";
+          } else if (lowerKey === "time_sig" || lowerKey === "time_signature" || lowerKey === "timesignature") {
+            uiType = "music_time_sig";
+            label = "Time Signature";
+          } else if (lowerKey === "duration" || lowerKey === "length" || lowerKey === "seconds") {
+            uiType = "music_duration";
+            label = "Duration (seconds)";
+          }
+        }
+
+        // Number-based parameters
+        if (typeof value === "number") {
+          if (lowerKey === "duration" || lowerKey === "length" || lowerKey === "seconds") {
+            uiType = "music_duration";
+            label = "Duration (seconds)";
+          } else if (lowerKey === "bpm") {
+            uiType = "music_bpm";
+            label = "BPM";
+          }
+        }
+
+        if (uiType) {
+          mappings.push({
+            nodeId,
+            fieldName: key,
+            uiType,
+            label,
+            defaultValue: value,
+          });
+        }
+      }
+    }
+
   }
 
   return mappings;
@@ -287,12 +355,22 @@ export function detectOutputNode(
     "vhs_videocombine",
     "savevideo",
     "saveanimatedgif",
+    "saveaudio",
+    "vhs_audiosave",
+    "cassettesaver",
+    "saveaudiomp3",
+    "saveaudiowav",
+    "saveaudioflac",
+    "saveaudioogg",
   ];
 
   for (const [nodeId, rawNode] of Object.entries(apiJson)) {
     const node = rawNode as WorkflowNode;
-    if (node?.class_type && outputTypes.includes(node.class_type.toLowerCase())) {
-      return nodeId;
+    if (node?.class_type) {
+      const type = node.class_type.toLowerCase();
+      if (outputTypes.includes(type) || type.startsWith("saveaudio")) {
+        return nodeId;
+      }
     }
   }
 
@@ -307,6 +385,12 @@ export function getUITypeLabel(uiType: InputUIType): string {
     prompt: "Prompt",
     negative_prompt: "Negative Prompt",
     image_upload: "Image Upload",
+    audio_upload: "Audio Upload",
+    music_tags: "Music Tags",
+    music_duration: "Duration",
+    music_bpm: "BPM",
+    music_key: "Musical Key",
+    music_time_sig: "Time Signature",
     checkpoint: "Checkpoint",
     width: "Width",
     height: "Height",

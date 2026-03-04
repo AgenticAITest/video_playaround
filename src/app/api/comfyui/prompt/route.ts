@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
       enhancedPrompt,
       params,
       inputImageFilenames,
+      inputAudioFilename,
       clientId,
       comfyuiUrl,
     } = body as {
@@ -25,6 +26,7 @@ export async function POST(request: NextRequest) {
       enhancedPrompt?: string;
       params: GenerationParams;
       inputImageFilenames?: Record<string, string>;
+      inputAudioFilename?: string | null;
       clientId?: string;
       comfyuiUrl?: string;
     };
@@ -94,8 +96,18 @@ export async function POST(request: NextRequest) {
             node.inputs[mapping.fieldName] = inputImageFilenames[key];
           }
           break;
+        case "audio_upload":
+          if (inputAudioFilename) {
+            node.inputs[mapping.fieldName] = inputAudioFilename;
+          }
+          break;
+        case "music_tags":
+        case "music_duration":
+        case "music_bpm":
+        case "music_key":
+        case "music_time_sig":
         default:
-          // For custom mappings, check if param has a matching key
+          // For custom and music_tags, check if param has a matching key
           if (
             mapping.fieldName in params &&
             params[mapping.fieldName] !== undefined
@@ -162,6 +174,7 @@ export async function POST(request: NextRequest) {
       negativePrompt: negativePrompt || "",
       params,
       inputImagePath: inputImageFilenames ? Object.values(inputImageFilenames)[0] : null,
+      inputAudioPath: inputAudioFilename || null,
     });
 
     // Queue on ComfyUI

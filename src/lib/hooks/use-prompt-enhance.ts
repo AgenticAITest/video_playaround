@@ -8,7 +8,9 @@ interface UsePromptEnhanceResult {
     prompt: string,
     mode: GenerationMode,
     openRouterApiKey: string,
-    model?: string
+    model?: string,
+    intent?: "enhance" | "lyrics",
+    duration?: number
   ) => Promise<string | null>;
   enhancing: boolean;
   error: string | null;
@@ -23,7 +25,9 @@ export function usePromptEnhance(): UsePromptEnhanceResult {
       prompt: string,
       mode: GenerationMode,
       openRouterApiKey: string,
-      model?: string
+      model?: string,
+      intent: "enhance" | "lyrics" = "enhance",
+      duration?: number
     ): Promise<string | null> => {
       setEnhancing(true);
       setError(null);
@@ -32,7 +36,7 @@ export function usePromptEnhance(): UsePromptEnhanceResult {
         const res = await fetch("/api/openrouter/enhance", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, mode, openRouterApiKey, model }),
+          body: JSON.stringify({ prompt, mode, openRouterApiKey, model, intent, duration }),
         });
 
         const data = await res.json();
