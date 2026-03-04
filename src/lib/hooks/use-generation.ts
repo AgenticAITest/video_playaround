@@ -40,7 +40,7 @@ interface UseGenerationResult {
     prompt: string;
     negativePrompt?: string;
     params: GenerationParams;
-    inputImageFilename?: string;
+    inputImageFilenames?: Record<string, string>;
   }) => Promise<void>;
   enhancePrompt: (prompt: string) => Promise<string | null>;
   cancel: () => Promise<void>;
@@ -361,7 +361,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
       prompt: string;
       negativePrompt?: string;
       params: GenerationParams;
-      inputImageFilename?: string;
+      inputImageFilenames?: Record<string, string>;
     }) => {
       completedRef.current = false;
       lastActivityRef.current = null;
@@ -388,7 +388,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
             negativePrompt: opts.negativePrompt,
             enhancedPrompt: enhancedPrompt,
             params: opts.params,
-            inputImageFilename: opts.inputImageFilename,
+            inputImageFilenames: opts.inputImageFilenames,
             comfyuiUrl: settings.comfyuiUrl,
           }),
         });

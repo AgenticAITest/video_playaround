@@ -1,4 +1,4 @@
-export type WorkflowCategory = "text-to-image" | "text-to-video" | "image-to-video";
+export type WorkflowCategory = "text-to-image" | "text-to-video" | "image-to-video" | "image-to-image";
 
 export type InputUIType =
   | "prompt"

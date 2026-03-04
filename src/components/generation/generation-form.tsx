@@ -32,9 +32,9 @@ export function GenerationForm({ mode }: GenerationFormProps) {
   const [negativePrompt, setNegativePrompt] = useState("");
   const [selectedWorkflow, setSelectedWorkflow] =
     useState<WorkflowConfig | null>(null);
-  const [inputImageFilename, setInputImageFilename] = useState<string | null>(
-    null
-  );
+  const [inputImageFilenames, setInputImageFilenames] = useState<
+    Record<string, string>
+  >({});
   const [inputAudioFilename, setInputAudioFilename] = useState<string | null>(
     null
   );
@@ -49,6 +49,7 @@ export function GenerationForm({ mode }: GenerationFormProps) {
   // When a workflow is selected, pre-populate prompts and params from its defaults
   const handleWorkflowSelect = useCallback((wf: WorkflowConfig) => {
     setSelectedWorkflow(wf);
+    setInputImageFilenames({}); // Clear previous images when switching workflows
 
     for (const mapping of wf.inputMappings) {
       const val = mapping.defaultValue;
@@ -85,6 +86,12 @@ export function GenerationForm({ mode }: GenerationFormProps) {
         case "scheduler":
           setParams((p) => ({ ...p, scheduler: String(val) }));
           break;
+        case "image_upload":
+          if (val) {
+            const key = `${mapping.nodeId}.${mapping.fieldName}`;
+            setInputImageFilenames((prev) => ({ ...prev, [key]: String(val) }));
+          }
+          break;
       }
     }
   }, [prompt, negativePrompt]);
@@ -94,8 +101,20 @@ export function GenerationForm({ mode }: GenerationFormProps) {
     gen.status !== "completed" &&
     gen.status !== "error";
 
+  // Identify all image upload mappings
+  const imageMappings = selectedWorkflow?.inputMappings.filter(
+    (m) => m.uiType === "image_upload"
+  ) || [];
+
   const canGenerate =
-    prompt.trim() && selectedWorkflow && !isGenerating;
+    prompt.trim() &&
+    selectedWorkflow &&
+    !isGenerating &&
+    // Only the first image mapping is mandatory; others are optional
+    (imageMappings.length === 0 ||
+      !!inputImageFilenames[
+      `${imageMappings[0].nodeId}.${imageMappings[0].fieldName}`
+      ]);
 
   const handleEnhance = useCallback(async () => {
     if (!prompt.trim()) return;
@@ -110,15 +129,14 @@ export function GenerationForm({ mode }: GenerationFormProps) {
       prompt,
       negativePrompt,
       params,
-      inputImageFilename: inputImageFilename || inputAudioFilename || undefined,
+      inputImageFilenames,
     });
   }, [
     selectedWorkflow,
     prompt,
     negativePrompt,
     params,
-    inputImageFilename,
-    inputAudioFilename,
+    inputImageFilenames,
     gen,
   ]);
 
@@ -147,18 +165,62 @@ export function GenerationForm({ mode }: GenerationFormProps) {
           </CardContent>
         </Card>
 
-        {/* Image uploader for image-based input modes */}
+        {/* Image uploaders for image-based input modes */}
         {(mode === "image-to-video" || mode === "image-to-image") && (
-          <Card>
-            <CardContent className="pt-6">
-              <ImageUploader
-                uploadedFilename={inputImageFilename}
-                onUpload={setInputImageFilename}
-                onRemove={() => setInputImageFilename(null)}
-                disabled={isGenerating}
-              />
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            {imageMappings.length > 0 ? (
+              imageMappings.map((mapping, index) => {
+                const key = `${mapping.nodeId}.${mapping.fieldName}`;
+                const label = index === 0 ? "Primary Input Image" : `Input Image ${index + 1}`;
+                const isOptional = index > 0;
+
+                return (
+                  <Card key={key}>
+                    <CardContent className="pt-6">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-sm font-medium tracking-tight">
+                          {label}
+                        </span>
+                        {isOptional && (
+                          <Badge variant="outline" className="text-[10px] uppercase">
+                            Optional
+                          </Badge>
+                        )}
+                      </div>
+                      <ImageUploader
+                        uploadedFilename={inputImageFilenames[key] || null}
+                        onUpload={(filename) =>
+                          setInputImageFilenames((prev) => ({ ...prev, [key]: filename }))
+                        }
+                        onRemove={() =>
+                          setInputImageFilenames((prev) => {
+                            const next = { ...prev };
+                            delete next[key];
+                            return next;
+                          })
+                        }
+                        disabled={isGenerating}
+                      />
+                    </CardContent>
+                  </Card>
+                );
+              })
+            ) : (
+              /* Fallback if no specific mappings detected but mode implies an image is needed */
+              <Card>
+                <CardContent className="pt-6">
+                  <ImageUploader
+                    uploadedFilename={Object.values(inputImageFilenames)[0] || null}
+                    onUpload={(filename) =>
+                      setInputImageFilenames({ primary: filename })
+                    }
+                    onRemove={() => setInputImageFilenames({})}
+                    disabled={isGenerating}
+                  />
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
 
         {/* Audio uploader for music-to-music */}

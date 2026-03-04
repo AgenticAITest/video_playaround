@@ -41,7 +41,7 @@ import {
   Lightbulb,
   Settings2,
 } from "lucide-react";
-import { validateApiFormat } from "@/lib/comfyui/workflow-utils";
+import { validateApiFormat, stripFileReferences } from "@/lib/comfyui/workflow-utils";
 import { getNodeFriendlyName } from "@/lib/comfyui/node-descriptions";
 import type { WorkflowCategory, InputMapping } from "@/types/workflow";
 import type {
@@ -132,7 +132,8 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
           setJsonContent(null);
           return;
         }
-        setJsonContent(parsed);
+        const sanitized = stripFileReferences(parsed);
+        setJsonContent(sanitized);
         setFileName(file.name);
         setValidationError(null);
         setName(file.name.replace(/\.json$/, "").replace(/[_-]/g, " "));
@@ -153,7 +154,8 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
         setJsonContent(null);
         return;
       }
-      setJsonContent(parsed);
+      const sanitized = stripFileReferences(parsed);
+      setJsonContent(sanitized);
       setFileName("pasted-workflow.json");
       setValidationError(null);
       if (!name) setName("Pasted Workflow");
@@ -301,10 +303,10 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
               <div key={s} className="flex items-center gap-1">
                 <div
                   className={`flex h-6 items-center rounded-full px-2 text-xs font-medium transition-colors ${i < stepIndex
-                      ? "bg-primary/20 text-primary"
-                      : i === stepIndex
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                    ? "bg-primary/20 text-primary"
+                    : i === stepIndex
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
                     }`}
                 >
                   {i < stepIndex ? <CheckCircle2 className="mr-1 h-3 w-3" /> : null}
@@ -690,6 +692,7 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="text-to-image">Text to Image</SelectItem>
+                    <SelectItem value="image-to-image">Image to Image</SelectItem>
                     <SelectItem value="text-to-video">Text to Video</SelectItem>
                     <SelectItem value="image-to-video">Image to Video</SelectItem>
                   </SelectContent>

@@ -228,6 +228,7 @@ export function suggestCategory(apiJson: Record<string, unknown>): WorkflowCateg
 
   if (hasVideo && hasImageInput) return "image-to-video";
   if (hasVideo) return "text-to-video";
+  if (hasImageInput) return "image-to-image";
   return "text-to-image";
 }
 

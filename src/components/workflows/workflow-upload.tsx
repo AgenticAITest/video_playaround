@@ -183,6 +183,7 @@ export function WorkflowUpload({ open, onOpenChange }: WorkflowUploadProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="text-to-image">Text to Image</SelectItem>
+                <SelectItem value="image-to-image">Image to Image</SelectItem>
                 <SelectItem value="text-to-video">Text to Video</SelectItem>
                 <SelectItem value="image-to-video">Image to Video</SelectItem>
               </SelectContent>

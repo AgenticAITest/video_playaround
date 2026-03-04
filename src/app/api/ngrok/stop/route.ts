@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { stopTunnel, getTunnelStatus } from "@/lib/ngrok";
+import { stopTunnel } from "@/lib/ngrok/manager";
 
 export async function POST() {
     await stopTunnel();
-    return NextResponse.json(getTunnelStatus());
+    return NextResponse.json({ success: true });
 }

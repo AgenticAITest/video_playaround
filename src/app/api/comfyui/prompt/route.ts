@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       negativePrompt,
       enhancedPrompt,
       params,
-      inputImageFilename,
+      inputImageFilenames,
       clientId,
       comfyuiUrl,
     } = body as {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       negativePrompt?: string;
       enhancedPrompt?: string;
       params: GenerationParams;
-      inputImageFilename?: string;
+      inputImageFilenames?: Record<string, string>;
       clientId?: string;
       comfyuiUrl?: string;
     };
@@ -89,8 +89,9 @@ export async function POST(request: NextRequest) {
           }
           break;
         case "image_upload":
-          if (inputImageFilename) {
-            node.inputs[mapping.fieldName] = inputImageFilename;
+          const key = `${mapping.nodeId}.${mapping.fieldName}`;
+          if (inputImageFilenames && inputImageFilenames[key]) {
+            node.inputs[mapping.fieldName] = inputImageFilenames[key];
           }
           break;
         default:
@@ -105,6 +106,50 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Identify nodes to bypass (all images except the first are optional)
+    const imageUploadMappings = workflow.inputMappings.filter(
+      (m) => m.uiType === "image_upload"
+    );
+    const nodesToBypass = new Set<string>();
+
+    for (let i = 1; i < imageUploadMappings.length; i++) {
+      const mapping = imageUploadMappings[i];
+      const key = `${mapping.nodeId}.${mapping.fieldName}`;
+      if (!inputImageFilenames || !inputImageFilenames[key]) {
+        nodesToBypass.add(mapping.nodeId);
+      }
+    }
+
+    if (nodesToBypass.size > 0) {
+      console.log(
+        `[prompt] Bypassing optional image nodes: ${Array.from(
+          nodesToBypass
+        ).join(", ")}`
+      );
+
+      // 1. Remove the nodes from the workflow
+      for (const nodeId of nodesToBypass) {
+        delete filledWorkflow[nodeId];
+      }
+
+      // 2. Remove references to these nodes in other nodes' inputs
+      for (const node of Object.values(filledWorkflow) as any[]) {
+        if (!node.inputs) continue;
+        for (const [inputKey, value] of Object.entries(node.inputs)) {
+          if (
+            Array.isArray(value) &&
+            value.length === 2 &&
+            nodesToBypass.has(String(value[0]))
+          ) {
+            console.log(
+              `[prompt] Stripping reference to bypassed node ${value[0]} from input ${inputKey}`
+            );
+            delete node.inputs[inputKey];
+          }
+        }
+      }
+    }
+
     // Debug: log the filled workflow so we can compare with ComfyUI's version
     console.log("[prompt] Filled workflow being sent to ComfyUI:", JSON.stringify(filledWorkflow, null, 2));
 
@@ -116,7 +161,7 @@ export async function POST(request: NextRequest) {
       enhancedPrompt: enhancedPrompt || null,
       negativePrompt: negativePrompt || "",
       params,
-      inputImagePath: inputImageFilename || null,
+      inputImagePath: inputImageFilenames ? Object.values(inputImageFilenames)[0] : null,
     });
 
     // Queue on ComfyUI

@@ -68,10 +68,10 @@ export function listWorkflowNodes(
 
     const inputKeys = node.inputs
       ? Object.keys(node.inputs).filter((k) => {
-          // Skip inputs that are links to other nodes (arrays like [nodeId, outputIndex])
-          const val = node.inputs[k];
-          return !Array.isArray(val);
-        })
+        // Skip inputs that are links to other nodes (arrays like [nodeId, outputIndex])
+        const val = node.inputs[k];
+        return !Array.isArray(val);
+      })
       : [];
 
     nodes.push({
@@ -318,4 +318,49 @@ export function getUITypeLabel(uiType: InputUIType): string {
     custom: "Custom",
   };
   return labels[uiType] || uiType;
+}
+/**
+ * Traverses a workflow JSON and removes values from fields that usually contain local filenames (image, audio).
+ * This ensures imported workflows don't carry over references to files that don't exist on the user's system.
+ */
+export function stripFileReferences(apiJson: Record<string, unknown>): Record<string, unknown> {
+  const workflow = JSON.parse(JSON.stringify(apiJson)) as WorkflowJson;
+  const fileNodes = [
+    "LoadImage",
+    "LoadImageMask",
+    "CLIPVisionLoader",
+    "GLIGENLoader",
+    "CannyEdgePreprocessor",
+    "Midas-DepthMapPreprocessor",
+    "HEDBoundaryPreprocessor",
+    "ScribblePreprocessor",
+    "FakeScribblePreprocessor",
+    "OpenposePreprocessor",
+    "BinaryPreprocessor",
+    "SaveImage",
+    "LoadAudio",
+    "VHS_LoadVideo",
+    "VHS_LoadAudio",
+  ];
+
+  const fileFields = ["image", "audio", "video", "mask", "clip_name", "vae_name", "unet_name", "model_name", "lora_name"];
+  // Note: we usually want to KEEP checkpoints and loras if they are standard,
+  // but for LOADERS of user-provided content (LoadImage, LoadAudio), we definitely want to strip.
+
+  const contentLoaders = ["LoadImage", "LoadImageMask", "LoadAudio", "VHS_LoadVideo", "VHS_LoadAudio"];
+
+  for (const node of Object.values(workflow)) {
+    if (!node?.class_type || !node.inputs) continue;
+
+    // Only strip for specific content loader nodes to avoid stripping model names accidentally
+    if (contentLoaders.includes(node.class_type)) {
+      for (const field of ["image", "audio", "video", "mask"]) {
+        if (field in node.inputs && typeof node.inputs[field] === "string") {
+          node.inputs[field] = "";
+        }
+      }
+    }
+  }
+
+  return workflow as unknown as Record<string, unknown>;
 }

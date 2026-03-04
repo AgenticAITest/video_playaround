@@ -49,8 +49,29 @@ export function DashboardStatus() {
       try {
         const res = await fetch("/api/ngrok/status");
         const data = await res.json();
-        setNgrokPhase(data.active ? "active" : "inactive");
-        setNgrokUrl(data.url ?? null);
+
+        if (data.active) {
+          setNgrokPhase("active");
+          setNgrokUrl(data.url ?? null);
+        } else if (settings.ngrokAuthToken) {
+          const startRes = await fetch("/api/ngrok/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              authToken: settings.ngrokAuthToken,
+              domain: settings.ngrokDomain || undefined
+            }),
+          });
+          const startData = await startRes.json();
+          if (startData.active) {
+            setNgrokPhase("active");
+            setNgrokUrl(startData.url);
+          } else {
+            setNgrokPhase("inactive");
+          }
+        } else {
+          setNgrokPhase("inactive");
+        }
       } catch {
         setNgrokPhase("inactive");
       }
@@ -59,7 +80,7 @@ export function DashboardStatus() {
     checkComfy();
     checkOr();
     checkNgrok();
-  }, [settings.comfyuiUrl, settings.openRouterApiKey]);
+  }, [settings.comfyuiUrl, settings.openRouterApiKey, settings.ngrokAuthToken, settings.ngrokDomain]);
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

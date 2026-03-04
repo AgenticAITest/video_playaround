@@ -14,6 +14,7 @@ export interface GenerationParams {
   steps: number;
   cfgScale: number;
   seed: number; // -1 = random
+  inputImageFilenames?: Record<string, string>; // Maps nodeId.fieldName -> filename
   [key: string]: unknown;
 }
 
