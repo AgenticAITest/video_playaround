@@ -50,6 +50,8 @@ export function GenerationParamsPanel({
   const hasScheduler = has("scheduler");
   const hasCheckpoint = has("checkpoint");
 
+  const hasCustom = mappings.some((m) => m.uiType === "custom");
+
   // Fetch available checkpoints from ComfyUI
   const [checkpoints, setCheckpoints] = useState<string[]>([]);
   const [loadingCheckpoints, setLoadingCheckpoints] = useState(false);
@@ -70,15 +72,20 @@ export function GenerationParamsPanel({
           }
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingCheckpoints(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasCheckpoint, settings.comfyuiUrl]);
 
-  // If no mappings at all, show nothing
-  if (mappings.filter((m) => !["prompt", "negative_prompt", "image_upload"].includes(m.uiType)).length === 0) {
+  // If no mappings at all (vaguely relevant to parameters), show nothing
+  const relevantMappings = mappings.filter(
+    (m) => !["prompt", "negative_prompt", "image_upload"].includes(m.uiType)
+  );
+  if (relevantMappings.length === 0) {
     return null;
   }
+
+  const customMappings = mappings.filter((m) => m.uiType === "custom");
 
   return (
     <div className="space-y-4">
@@ -131,7 +138,7 @@ export function GenerationParamsPanel({
                   key={preset.label}
                   variant={
                     params.width === preset.width &&
-                    params.height === preset.height
+                      params.height === preset.height
                       ? "secondary"
                       : "ghost"
                   }
@@ -185,6 +192,22 @@ export function GenerationParamsPanel({
           </div>
         </div>
       )}
+
+      {/* Custom Inputs */}
+      {customMappings.map((mapping) => (
+        <div key={`${mapping.nodeId}.${mapping.fieldName}`} className="space-y-1">
+          <Label className="text-xs">{mapping.label}</Label>
+          <Input
+            value={String(params[mapping.fieldName] ?? mapping.defaultValue ?? "")}
+            onChange={(e) =>
+              update({ [mapping.fieldName]: e.target.value })
+            }
+            disabled={disabled}
+            className="h-8 text-sm"
+            placeholder={mapping.label}
+          />
+        </div>
+      ))}
 
       {/* Steps */}
       {hasSteps && (
