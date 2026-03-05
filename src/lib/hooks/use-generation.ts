@@ -40,9 +40,11 @@ interface UseGenerationResult {
     prompt: string;
     negativePrompt?: string;
     params: GenerationParams;
-    inputImageFilename?: string;
+    inputImageFilenames?: Record<string, string>;
+    inputAudioFilename?: string | null;
   }) => Promise<void>;
   enhancePrompt: (prompt: string) => Promise<string | null>;
+  generateLyrics: (tags: string, duration?: number) => Promise<string | null>;
   cancel: () => Promise<void>;
   reset: () => void;
 }
@@ -341,8 +343,8 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
       const result = await enhance(
         prompt,
         mode,
-        settings.lmStudioUrl,
-        settings.lmStudioModel || undefined
+        settings.openRouterApiKey,
+        settings.openRouterModel || undefined
       );
       if (result) {
         setEnhancedPrompt(result);
@@ -352,7 +354,27 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
       setElapsedMs(0);
       return result;
     },
-    [enhance, mode, settings.lmStudioUrl, settings.lmStudioModel]
+    [enhance, mode, settings.openRouterApiKey, settings.openRouterModel]
+  );
+
+  const generateLyrics = useCallback(
+    async (tags: string, duration?: number) => {
+      setStatus("enhancing");
+      setStartedAt(Date.now());
+      const result = await enhance(
+        tags,
+        mode,
+        settings.openRouterApiKey,
+        settings.openRouterModel || undefined,
+        "lyrics",
+        duration
+      );
+      setStatus("idle");
+      setStartedAt(null);
+      setElapsedMs(0);
+      return result;
+    },
+    [enhance, mode, settings.openRouterApiKey, settings.openRouterModel]
   );
 
   const generate = useCallback(
@@ -361,7 +383,8 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
       prompt: string;
       negativePrompt?: string;
       params: GenerationParams;
-      inputImageFilename?: string;
+      inputImageFilenames?: Record<string, string>;
+      inputAudioFilename?: string | null;
     }) => {
       completedRef.current = false;
       lastActivityRef.current = null;
@@ -388,7 +411,8 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
             negativePrompt: opts.negativePrompt,
             enhancedPrompt: enhancedPrompt,
             params: opts.params,
-            inputImageFilename: opts.inputImageFilename,
+            inputImageFilenames: opts.inputImageFilenames,
+            inputAudioFilename: opts.inputAudioFilename,
             comfyuiUrl: settings.comfyuiUrl,
           }),
         });
@@ -477,6 +501,7 @@ export function useGeneration(mode: GenerationMode): UseGenerationResult {
     stalled,
     generate,
     enhancePrompt,
+    generateLyrics,
     cancel,
     reset,
   };

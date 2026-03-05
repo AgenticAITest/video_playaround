@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ConnectionStatus } from "./connection-status";
+import { NgrokStatus } from "./ngrok-status";
 import { toast } from "sonner";
 import { RotateCcw } from "lucide-react";
 
@@ -28,41 +29,42 @@ export function SettingsForm() {
         <CardHeader>
           <CardTitle>Backend Connections</CardTitle>
           <CardDescription>
-            Configure the URLs for LM Studio and ComfyUI
+            Configure the connections for ComfyUI and OpenRouter
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* LM Studio */}
+          {/* OpenRouter */}
           <div className="space-y-3">
-            <Label htmlFor="lm-studio-url">LM Studio URL</Label>
+            <Label htmlFor="openrouter-api-key">OpenRouter API Key</Label>
             <Input
-              id="lm-studio-url"
-              value={settings.lmStudioUrl}
-              onChange={(e) => settings.update({ lmStudioUrl: e.target.value })}
-              placeholder="http://localhost:1234"
+              id="openrouter-api-key"
+              type="password"
+              value={settings.openRouterApiKey}
+              onChange={(e) => settings.update({ openRouterApiKey: e.target.value })}
+              placeholder="sk-or-v1-..."
             />
             <ConnectionStatus
-              label="LM Studio"
-              url={settings.lmStudioUrl}
-              endpoint="/api/lmstudio/status"
+              label="OpenRouter"
+              url={settings.openRouterApiKey}
+              endpoint="/api/openrouter/status"
             />
           </div>
 
           <Separator />
 
-          {/* LM Studio Model */}
+          {/* OpenRouter Model */}
           <div className="space-y-3">
-            <Label htmlFor="lm-studio-model">LM Studio Model (optional)</Label>
+            <Label htmlFor="openrouter-model">OpenRouter Model</Label>
             <Input
-              id="lm-studio-model"
-              value={settings.lmStudioModel}
+              id="openrouter-model"
+              value={settings.openRouterModel}
               onChange={(e) =>
-                settings.update({ lmStudioModel: e.target.value })
+                settings.update({ openRouterModel: e.target.value })
               }
-              placeholder="Leave empty to auto-detect"
+              placeholder="google/gemini-2.5-flash"
             />
             <p className="text-xs text-muted-foreground">
-              Specific model name for prompt enhancement. Leave empty to use whatever is loaded.
+              Specific model name for prompt enhancement and workflow explanation.
             </p>
           </div>
 
@@ -81,6 +83,70 @@ export function SettingsForm() {
               label="ComfyUI"
               url={settings.comfyuiUrl}
               endpoint="/api/comfyui/status"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Ngrok Tunnel */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Ngrok Tunnel</CardTitle>
+          <CardDescription>
+            Expose the local server via an ngrok tunnel. The tunnel starts
+            automatically when an auth token is set and restarts on changes.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="ngrok-auth-token">Auth Token</Label>
+            <Input
+              id="ngrok-auth-token"
+              type="password"
+              value={settings.ngrokAuthToken}
+              onChange={(e) =>
+                settings.update({ ngrokAuthToken: e.target.value })
+              }
+              placeholder="2abc..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Find your auth token at{" "}
+              <a
+                href="https://dashboard.ngrok.com/get-started/your-authtoken"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2"
+              >
+                dashboard.ngrok.com
+              </a>
+              .
+            </p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <Label htmlFor="ngrok-domain">Custom Domain</Label>
+            <Input
+              id="ngrok-domain"
+              value={settings.ngrokDomain}
+              onChange={(e) =>
+                settings.update({ ngrokDomain: e.target.value })
+              }
+              placeholder="your-domain.ngrok-free.app (optional)"
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank to use a randomly assigned ngrok URL.
+            </p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-2">
+            <Label>Tunnel Status</Label>
+            <NgrokStatus
+              authToken={settings.ngrokAuthToken}
+              domain={settings.ngrokDomain}
             />
           </div>
         </CardContent>
@@ -172,7 +238,7 @@ export function SettingsForm() {
             <div className="space-y-0.5">
               <Label>Auto-enhance Prompts</Label>
               <p className="text-xs text-muted-foreground">
-                Automatically enhance prompts with LM Studio before generating
+                Automatically enhance prompts with OpenRouter before generating
               </p>
             </div>
             <Switch

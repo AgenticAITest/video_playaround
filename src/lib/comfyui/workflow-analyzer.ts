@@ -223,11 +223,24 @@ export function suggestCategory(apiJson: Record<string, unknown>): WorkflowCateg
   ];
   const hasVideo = videoNodes.some((n) => types.has(n));
 
+  // Audio/Music indicators
+  const audioNodes = [
+    "saveaudio", "vhs_audiosave", "audiogen", "musicgen", "cassettesaver", "loadaudio", "vhs_loadaudio",
+    "saveaudiomp3", "saveaudiowav", "saveaudioflac", "saveaudioogg"
+  ];
+  const hasAudio = Array.from(types).some((t) =>
+    audioNodes.includes(t) || t.startsWith("saveaudio") || t.includes("audiowrap")
+  );
+  const hasAudioInput = types.has("loadaudio") || types.has("vhs_loadaudio");
+
   // Image input indicators
   const hasImageInput = types.has("loadimage");
 
+  if (hasAudio && hasAudioInput) return "music-to-music";
+  if (hasAudio) return "text-to-music";
   if (hasVideo && hasImageInput) return "image-to-video";
   if (hasVideo) return "text-to-video";
+  if (hasImageInput) return "image-to-image";
   return "text-to-image";
 }
 

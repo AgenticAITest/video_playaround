@@ -7,8 +7,10 @@ interface UsePromptEnhanceResult {
   enhance: (
     prompt: string,
     mode: GenerationMode,
-    lmStudioUrl: string,
-    model?: string
+    openRouterApiKey: string,
+    model?: string,
+    intent?: "enhance" | "lyrics",
+    duration?: number
   ) => Promise<string | null>;
   enhancing: boolean;
   error: string | null;
@@ -22,17 +24,19 @@ export function usePromptEnhance(): UsePromptEnhanceResult {
     async (
       prompt: string,
       mode: GenerationMode,
-      lmStudioUrl: string,
-      model?: string
+      openRouterApiKey: string,
+      model?: string,
+      intent: "enhance" | "lyrics" = "enhance",
+      duration?: number
     ): Promise<string | null> => {
       setEnhancing(true);
       setError(null);
 
       try {
-        const res = await fetch("/api/lmstudio/enhance", {
+        const res = await fetch("/api/openrouter/enhance", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, mode, lmStudioUrl, model }),
+          body: JSON.stringify({ prompt, mode, openRouterApiKey, model, intent, duration }),
         });
 
         const data = await res.json();

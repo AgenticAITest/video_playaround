@@ -1,10 +1,11 @@
 "use client";
 
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Film, Image as ImageIcon } from "lucide-react";
-import { formatDate, truncate, needsVideoElement } from "@/lib/utils";
+import { Film, Image as ImageIcon, Music } from "lucide-react";
+import { formatDate, truncate, needsVideoElement, needsAudioElement } from "@/lib/utils";
 import type { GenerationRecord } from "@/types/generation";
 
 interface GalleryCardProps {
@@ -22,8 +23,10 @@ const modeLabels: Record<string, string> = {
 };
 
 export function GalleryCard({ generation, comfyuiUrl }: GalleryCardProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
   const firstOutput = generation.outputFiles[0];
   const isVideo = firstOutput ? needsVideoElement(firstOutput.filename) : false;
+  const isAudio = firstOutput ? needsAudioElement(firstOutput.filename) : false;
 
   const thumbnailUrl = firstOutput
     ? `/api/comfyui/view?filename=${encodeURIComponent(firstOutput.filename)}&subfolder=${encodeURIComponent(firstOutput.subfolder)}&type=${firstOutput.type}&comfyuiUrl=${encodeURIComponent(comfyuiUrl)}&generationId=${encodeURIComponent(generation.id)}`
@@ -48,6 +51,25 @@ export function GalleryCard({ generation, comfyuiUrl }: GalleryCardProps) {
                     e.currentTarget.currentTime = 0;
                   }}
                 />
+              ) : isAudio ? (
+                <div
+                  className="flex flex-col h-full items-center justify-center bg-accent/10 transition-transform group-hover:scale-105"
+                  onMouseEnter={() => audioRef.current?.play()}
+                  onMouseLeave={() => {
+                    if (audioRef.current) {
+                      audioRef.current.pause();
+                      audioRef.current.currentTime = 0;
+                    }
+                  }}
+                >
+                  <Music className="h-12 w-12 text-primary/40" />
+                  <audio
+                    ref={audioRef}
+                    src={thumbnailUrl}
+                    muted={false}
+                    className="hidden"
+                  />
+                </div>
               ) : (
                 <img
                   src={thumbnailUrl}
@@ -74,10 +96,15 @@ export function GalleryCard({ generation, comfyuiUrl }: GalleryCardProps) {
               {modeLabels[generation.mode]}
             </Badge>
 
-            {/* Video indicator */}
+            {/* Media indicator */}
             {isVideo && (
               <div className="absolute bottom-2 right-2">
                 <Film className="h-4 w-4 text-white drop-shadow" />
+              </div>
+            )}
+            {isAudio && (
+              <div className="absolute bottom-2 right-2">
+                <Music className="h-4 w-4 text-white drop-shadow" />
               </div>
             )}
           </div>
