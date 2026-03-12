@@ -18,20 +18,26 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Pencil, Trash2, Image, Film, PlayCircle } from "lucide-react";
+import { Pencil, Trash2, Image, Film, PlayCircle, ImagePlus, Music, Disc3 } from "lucide-react";
 import type { WorkflowConfig } from "@/types/workflow";
 import { formatDate } from "@/lib/utils";
 
 const categoryIcons = {
   "text-to-image": Image,
+  "image-to-image": ImagePlus,
   "text-to-video": Film,
   "image-to-video": PlayCircle,
+  "text-to-music": Music,
+  "music-to-music": Disc3,
 };
 
 const categoryLabels = {
   "text-to-image": "Text to Image",
+  "image-to-image": "Image to Image",
   "text-to-video": "Text to Video",
   "image-to-video": "Image to Video",
+  "text-to-music": "Text to Music",
+  "music-to-music": "Music to Music",
 };
 
 export function WorkflowList() {

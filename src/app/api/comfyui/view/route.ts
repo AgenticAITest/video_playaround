@@ -22,17 +22,14 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const rangeHeader = request.headers.get("range");
+
   // If generationId provided and file is cached, serve from disk
   if (generationId && isCached(generationId, filename)) {
     const data = readCachedFile(generationId, filename);
     if (data) {
-      return new NextResponse(new Uint8Array(data), {
-        status: 200,
-        headers: {
-          "Content-Type": getContentType(filename),
-          "Cache-Control": "public, max-age=31536000, immutable",
-          "X-Cache": "HIT",
-        },
+      return createBufferResponse(data, getContentType(filename), rangeHeader, {
+        "X-Cache": "HIT",
       });
     }
   }
@@ -56,26 +53,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return new NextResponse(buffer, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "X-Cache": generationId ? "MISS" : "PROXY",
-      },
+    return createBufferResponse(buffer, contentType, rangeHeader, {
+      "X-Cache": generationId ? "MISS" : "PROXY",
     });
   } catch (error) {
     // Fallback: if ComfyUI is down but we have a cached copy, serve it
     if (generationId) {
       const data = readCachedFile(generationId, filename);
       if (data) {
-        return new NextResponse(new Uint8Array(data), {
-          status: 200,
-          headers: {
-            "Content-Type": getContentType(filename),
-            "Cache-Control": "public, max-age=31536000, immutable",
-            "X-Cache": "FALLBACK",
-          },
+        return createBufferResponse(data, getContentType(filename), rangeHeader, {
+          "X-Cache": "FALLBACK",
         });
       }
     }
@@ -84,4 +71,55 @@ export async function GET(request: NextRequest) {
       error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+/**
+ * Creates a response for a buffer, supporting Range requests for seeking.
+ */
+function createBufferResponse(
+  buffer: Buffer,
+  contentType: string,
+  rangeHeader: string | null,
+  extraHeaders: Record<string, string> = {}
+) {
+  const totalLength = buffer.length;
+  const commonHeaders = {
+    ...extraHeaders,
+    "Content-Type": contentType,
+    "Accept-Ranges": "bytes",
+    "Cache-Control": "public, max-age=31536000, immutable",
+  };
+
+  if (rangeHeader && rangeHeader.startsWith("bytes=")) {
+    try {
+      const parts = rangeHeader.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : totalLength - 1;
+
+      if (!isNaN(start) && start < totalLength) {
+        const chunkEnd = Math.min(end, totalLength - 1);
+        const chunkLength = chunkEnd - start + 1;
+        const chunk = buffer.subarray(start, chunkEnd + 1);
+
+        return new NextResponse(new Uint8Array(chunk), {
+          status: 206,
+          headers: {
+            ...commonHeaders,
+            "Content-Range": `bytes ${start}-${chunkEnd}/${totalLength}`,
+            "Content-Length": chunkLength.toString(),
+          },
+        });
+      }
+    } catch (e) {
+      console.error("[view-api] Range parse error:", e);
+    }
+  }
+
+  return new NextResponse(new Uint8Array(buffer), {
+    status: 200,
+    headers: {
+      ...commonHeaders,
+      "Content-Length": totalLength.toString(),
+    },
+  });
 }

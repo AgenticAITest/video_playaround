@@ -111,7 +111,7 @@ export function AudioUploader({
         <div
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
-          className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-8 transition-colors hover:border-primary/50"
+          className="relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-8 transition-colors hover:border-primary/50"
         >
           {uploading ? (
             <>
@@ -132,7 +132,6 @@ export function AudioUploader({
                 accept="audio/*"
                 disabled={disabled}
                 className="absolute inset-0 cursor-pointer opacity-0"
-                style={{ position: "relative" }}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) handleFile(file);

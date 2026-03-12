@@ -32,7 +32,7 @@ import {
   ImagePlus,
   Disc3,
 } from "lucide-react";
-import { formatDate, needsVideoElement } from "@/lib/utils";
+import { formatDate, needsVideoElement, needsAudioElement } from "@/lib/utils";
 import { useSettingsStore } from "@/lib/store/settings-store";
 import type { GenerationRecord, OutputFile } from "@/types/generation";
 
@@ -172,6 +172,16 @@ export function MediaViewer({ generation }: MediaViewerProps) {
                     className="w-full bg-black"
                     style={{ maxHeight: 700 }}
                   />
+                ) : needsAudioElement(activeFile.filename) ? (
+                  <div className="flex flex-col items-center justify-center bg-accent/10 p-12 py-24">
+                    <Music className="mb-8 h-20 w-20 text-primary/40" />
+                    <audio
+                      src={getViewUrl(activeFile)}
+                      controls
+                      autoPlay
+                      className="w-full max-w-md"
+                    />
+                  </div>
                 ) : (
                   <img
                     src={getViewUrl(activeFile)}
@@ -191,15 +201,18 @@ export function MediaViewer({ generation }: MediaViewerProps) {
                 <button
                   key={`${file.filename}-${idx}`}
                   onClick={() => setActiveFile(file)}
-                  className={`shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
-                    activeFile?.filename === file.filename
-                      ? "border-primary"
-                      : "border-transparent hover:border-border"
-                  }`}
+                  className={`shrink-0 overflow-hidden rounded-md border-2 transition-colors ${activeFile?.filename === file.filename
+                    ? "border-primary"
+                    : "border-transparent hover:border-border"
+                    }`}
                 >
                   {needsVideoElement(file.filename) ? (
                     <div className="flex h-16 w-16 items-center justify-center bg-muted">
                       <Film className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  ) : needsAudioElement(file.filename) ? (
+                    <div className="flex h-16 w-16 items-center justify-center bg-muted">
+                      <Music className="h-5 w-5 text-muted-foreground" />
                     </div>
                   ) : (
                     <img

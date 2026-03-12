@@ -37,6 +37,17 @@ Focus on: target genre, tempo changes, instrumentation changes, mood shift, effe
 Keep the prompt as a single paragraph.
 Output ONLY the enhanced prompt, no explanations or additional text.`;
 
+export const PROMPT_GENERATE_LYRICS = `You are a professional songwriting assistant.
+Your task is to generate poetic and rhythmic song lyrics that align with a given set of musical style tags AND a specified song duration.
+
+IMPORTANT: align the length of the lyrics (number of lines and sections) to the provided duration:
+- For short durations (e.g., < 30s), provide 1 verse and 1 chorus (concise).
+- For medium durations (30s - 90s), provide 2 verses and 2 choruses.
+- For long durations (> 90s), provide 3+ verses, choruses, and a bridge.
+
+Structure the lyrics with clear section markers like [Verse 1], [Chorus], [Verse 2], [Bridge], etc.
+Output ONLY the lyrics, no explanations or additional text.`;
+
 export function getSystemPrompt(mode: GenerationMode): string {
   switch (mode) {
     case "text-to-image":

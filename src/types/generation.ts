@@ -14,6 +14,7 @@ export interface GenerationParams {
   steps: number;
   cfgScale: number;
   seed: number; // -1 = random
+  inputImageFilenames?: Record<string, string>; // Maps nodeId.fieldName -> filename
   [key: string]: unknown;
 }
 
@@ -21,7 +22,7 @@ export interface OutputFile {
   filename: string;
   subfolder: string;
   type: "output" | "temp";
-  mediaType: "image" | "video";
+  mediaType: "image" | "video" | "audio";
 }
 
 export interface GenerationRecord {
@@ -33,6 +34,7 @@ export interface GenerationRecord {
   negativePrompt: string;
   params: GenerationParams;
   inputImagePath: string | null;
+  inputAudioPath: string | null;
   outputFiles: OutputFile[];
   status: GenerationStatus;
   comfyPromptId: string | null;

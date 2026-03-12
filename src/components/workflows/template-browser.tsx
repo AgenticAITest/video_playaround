@@ -26,6 +26,7 @@ import {
   Package,
   AlertTriangle,
   ChevronRight,
+  ImagePlus,
 } from "lucide-react";
 import {
   WORKFLOW_TEMPLATES,
@@ -36,12 +37,14 @@ import type { WorkflowCategory } from "@/types/workflow";
 
 const categoryIcon: Record<string, React.ReactNode> = {
   "text-to-image": <Image className="h-5 w-5" />,
+  "image-to-image": <ImagePlus className="h-5 w-5" />,
   "text-to-video": <Film className="h-5 w-5" />,
   "image-to-video": <Video className="h-5 w-5" />,
 };
 
 const categoryLabel: Record<string, string> = {
   "text-to-image": "Text to Image",
+  "image-to-image": "Image to Image",
   "text-to-video": "Text to Video",
   "image-to-video": "Image to Video",
 };
@@ -187,9 +190,8 @@ export function TemplateBrowser() {
         compatibility and install it.
       </p>
 
-      {/* Category filter */}
-      <div className="flex gap-1.5">
-        {(["all", "text-to-image", "text-to-video", "image-to-video"] as const).map(
+      <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+        {(["all", "text-to-image", "image-to-image", "text-to-video", "image-to-video"] as const).map(
           (cat) => (
             <Button
               key={cat}
@@ -279,15 +281,14 @@ export function TemplateBrowser() {
                         return (
                           <div
                             key={i}
-                            className={`rounded-md px-3 py-2 text-sm ${
-                              checking
+                            className={`rounded-md px-3 py-2 text-sm ${checking
                                 ? "bg-muted/50"
                                 : isMissing
                                   ? "bg-destructive/10"
                                   : compat
                                     ? "bg-green-500/5"
                                     : "bg-muted/50"
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center gap-2">
                               {checking ? (
@@ -333,15 +334,14 @@ export function TemplateBrowser() {
                           return (
                             <div
                               key={i}
-                              className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm ${
-                                checking
+                              className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm ${checking
                                   ? "bg-muted/50"
                                   : isMissing
                                     ? "bg-destructive/10"
                                     : compat
                                       ? "bg-green-500/5"
                                       : "bg-muted/50"
-                              }`}
+                                }`}
                             >
                               {checking ? (
                                 <Loader2 className="h-3.5 w-3.5 animate-spin" />

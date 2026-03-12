@@ -4,10 +4,10 @@ import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Download, Copy, PlayCircle } from "lucide-react";
+import { Download, Copy, PlayCircle, Music } from "lucide-react";
 import { toast } from "sonner";
 import { useSettingsStore } from "@/lib/store/settings-store";
-import { needsVideoElement } from "@/lib/utils";
+import { needsVideoElement, needsAudioElement } from "@/lib/utils";
 import type { OutputFile } from "@/types/generation";
 
 interface OutputDisplayProps {
@@ -73,6 +73,15 @@ export function OutputDisplay({ outputFiles }: OutputDisplayProps) {
                   className="w-full bg-black"
                   style={{ maxHeight: 512 }}
                 />
+              ) : needsAudioElement(file.filename) ? (
+                <div className="flex flex-col items-center justify-center bg-accent/20 p-8 pt-12">
+                  <Music className="mb-4 h-12 w-12 text-primary/50" />
+                  <audio
+                    src={getViewUrl(file)}
+                    controls
+                    className="w-full"
+                  />
+                </div>
               ) : (
                 <img
                   src={getViewUrl(file)}

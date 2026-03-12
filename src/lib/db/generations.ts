@@ -16,6 +16,7 @@ interface CreateGenerationInput {
   negativePrompt?: string;
   params: GenerationParams;
   inputImagePath?: string | null;
+  inputAudioPath?: string | null;
 }
 
 function rowToGeneration(row: Record<string, unknown>): GenerationRecord {
@@ -28,6 +29,7 @@ function rowToGeneration(row: Record<string, unknown>): GenerationRecord {
     negativePrompt: (row.negative_prompt as string) || "",
     params: JSON.parse(row.params as string),
     inputImagePath: (row.input_image_path as string) || null,
+    inputAudioPath: (row.input_audio_path as string) || null,
     outputFiles: JSON.parse(row.output_files as string),
     status: row.status as GenerationStatus,
     comfyPromptId: (row.comfy_prompt_id as string) || null,
@@ -43,8 +45,8 @@ export function createGeneration(input: CreateGenerationInput): GenerationRecord
   const now = new Date().toISOString();
 
   db.prepare(
-    `INSERT INTO generations (id, mode, workflow_id, original_prompt, enhanced_prompt, negative_prompt, params, input_image_path, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO generations (id, mode, workflow_id, original_prompt, enhanced_prompt, negative_prompt, params, input_image_path, input_audio_path, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     input.mode,
@@ -54,6 +56,7 @@ export function createGeneration(input: CreateGenerationInput): GenerationRecord
     input.negativePrompt ?? "",
     JSON.stringify(input.params),
     input.inputImagePath ?? null,
+    input.inputAudioPath ?? null,
     now
   );
 

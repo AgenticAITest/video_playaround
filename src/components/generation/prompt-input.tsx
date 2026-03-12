@@ -18,10 +18,16 @@ interface PromptInputProps {
   onPromptChange: (value: string) => void;
   negativePrompt: string;
   onNegativePromptChange: (value: string) => void;
+  promptLabel?: string;
+  negativePromptLabel?: string;
+  promptPlaceholder?: string;
+  negativePromptPlaceholder?: string;
   enhancedPrompt: string | null;
   onEnhance: () => void;
   onClearEnhanced: () => void;
+  onGenerateLyrics?: () => void;
   enhancing: boolean;
+  generatingLyrics?: boolean;
   disabled?: boolean;
 }
 
@@ -30,10 +36,16 @@ export function PromptInput({
   onPromptChange,
   negativePrompt,
   onNegativePromptChange,
+  promptLabel = "Prompt",
+  negativePromptLabel = "Negative Prompt",
+  promptPlaceholder = "Describe what you want to generate...",
+  negativePromptPlaceholder = "What to avoid in the generation...",
   enhancedPrompt,
   onEnhance,
   onClearEnhanced,
+  onGenerateLyrics,
   enhancing,
+  generatingLyrics,
   disabled,
 }: PromptInputProps) {
   const [showNegative, setShowNegative] = useState(false);
@@ -43,7 +55,7 @@ export function PromptInput({
       {/* Main Prompt */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label>Prompt</Label>
+          <Label>{promptLabel}</Label>
           <Button
             variant="outline"
             size="sm"
@@ -58,7 +70,7 @@ export function PromptInput({
         <Textarea
           value={prompt}
           onChange={(e) => onPromptChange(e.target.value)}
-          placeholder="Describe what you want to generate..."
+          placeholder={promptPlaceholder}
           rows={3}
           disabled={disabled}
         />
@@ -69,7 +81,7 @@ export function PromptInput({
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-xs text-muted-foreground">
             <Sparkles className="h-3 w-3 text-primary" />
-            Enhanced Prompt
+            Enhanced {promptLabel}
           </Label>
           <Skeleton className="h-20 w-full" />
         </div>
@@ -80,7 +92,7 @@ export function PromptInput({
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2 text-xs">
               <Sparkles className="h-3 w-3 text-primary" />
-              Enhanced Prompt
+              Enhanced {promptLabel}
               <Badge variant="secondary" className="text-[10px]">
                 AI
               </Badge>
@@ -102,25 +114,40 @@ export function PromptInput({
       )}
 
       {/* Negative Prompt Toggle */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 gap-1 text-xs text-muted-foreground"
-        onClick={() => setShowNegative(!showNegative)}
-      >
-        {showNegative ? (
-          <ChevronUp className="h-3 w-3" />
-        ) : (
-          <ChevronDown className="h-3 w-3" />
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 gap-1 text-xs text-muted-foreground"
+          onClick={() => setShowNegative(!showNegative)}
+        >
+          {showNegative ? (
+            <ChevronUp className="h-3 w-3" />
+          ) : (
+            <ChevronDown className="h-3 w-3" />
+          )}
+          {negativePromptLabel}
+        </Button>
+
+        {onGenerateLyrics && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onGenerateLyrics}
+            disabled={!prompt.trim() || generatingLyrics || disabled}
+            className="h-7 gap-1.5 text-xs"
+          >
+            <Sparkles className="h-3 w-3" />
+            {generatingLyrics ? "Generating..." : "Generate Lyrics"}
+          </Button>
         )}
-        Negative Prompt
-      </Button>
+      </div>
 
       {showNegative && (
         <Textarea
           value={negativePrompt}
           onChange={(e) => onNegativePromptChange(e.target.value)}
-          placeholder="What to avoid in the generation..."
+          placeholder={negativePromptPlaceholder}
           rows={2}
           disabled={disabled}
         />

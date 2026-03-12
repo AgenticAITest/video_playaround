@@ -41,7 +41,7 @@ import {
   Lightbulb,
   Settings2,
 } from "lucide-react";
-import { validateApiFormat } from "@/lib/comfyui/workflow-utils";
+import { validateApiFormat, stripFileReferences } from "@/lib/comfyui/workflow-utils";
 import { getNodeFriendlyName } from "@/lib/comfyui/node-descriptions";
 import type { WorkflowCategory, InputMapping } from "@/types/workflow";
 import type {
@@ -66,7 +66,7 @@ interface ImportWizardProps {
 
 export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
   const router = useRouter();
-  const { comfyuiUrl, lmStudioUrl, lmStudioModel } = useSettingsStore();
+  const { comfyuiUrl, openRouterApiKey, openRouterModel } = useSettingsStore();
 
   // Step state
   const [step, setStep] = useState<WizardStep>("upload");
@@ -132,7 +132,8 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
           setJsonContent(null);
           return;
         }
-        setJsonContent(parsed);
+        const sanitized = stripFileReferences(parsed);
+        setJsonContent(sanitized);
         setFileName(file.name);
         setValidationError(null);
         setName(file.name.replace(/\.json$/, "").replace(/[_-]/g, " "));
@@ -153,7 +154,8 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
         setJsonContent(null);
         return;
       }
-      setJsonContent(parsed);
+      const sanitized = stripFileReferences(parsed);
+      setJsonContent(sanitized);
       setFileName("pasted-workflow.json");
       setValidationError(null);
       if (!name) setName("Pasted Workflow");
@@ -208,13 +210,13 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
     setExplainError(null);
 
     try {
-      const res = await fetch("/api/lmstudio/explain", {
+      const res = await fetch("/api/openrouter/explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workflowSummary: analysis.summaryForLLM,
-          lmStudioUrl,
-          model: lmStudioModel,
+          openRouterApiKey,
+          model: openRouterModel,
         }),
       });
 
@@ -227,12 +229,12 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
       }
     } catch (err) {
       setExplainError(
-        err instanceof Error ? err.message : "Failed to connect to LM Studio"
+        err instanceof Error ? err.message : "Failed to connect to OpenRouter"
       );
     } finally {
       setExplaining(false);
     }
-  }, [analysis, lmStudioUrl, lmStudioModel]);
+  }, [analysis, openRouterApiKey, openRouterModel]);
 
   // --- Save ---
   const handleSave = useCallback(async () => {
@@ -300,13 +302,12 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
             {steps.map((s, i) => (
               <div key={s} className="flex items-center gap-1">
                 <div
-                  className={`flex h-6 items-center rounded-full px-2 text-xs font-medium transition-colors ${
-                    i < stepIndex
-                      ? "bg-primary/20 text-primary"
-                      : i === stepIndex
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
-                  }`}
+                  className={`flex h-6 items-center rounded-full px-2 text-xs font-medium transition-colors ${i < stepIndex
+                    ? "bg-primary/20 text-primary"
+                    : i === stepIndex
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                    }`}
                 >
                   {i < stepIndex ? <CheckCircle2 className="mr-1 h-3 w-3" /> : null}
                   {stepLabels[s]}
@@ -485,9 +486,8 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
                       return (
                         <div
                           key={i}
-                          className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm ${
-                            isMissing ? "bg-destructive/10" : "bg-green-500/5"
-                          }`}
+                          className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm ${isMissing ? "bg-destructive/10" : "bg-green-500/5"
+                            }`}
                         >
                           {isMissing ? (
                             <XCircle className="h-3.5 w-3.5 text-destructive" />
@@ -636,7 +636,7 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
                       <p className="font-medium">Could not get AI explanation</p>
                       <p className="text-xs mt-1">{explainError}</p>
                       <p className="text-xs mt-1">
-                        Make sure LM Studio is running and a model is loaded.
+                        Make sure your OpenRouter API key is set.
                         You can skip this step and configure the workflow manually.
                       </p>
                     </div>
@@ -692,8 +692,11 @@ export function ImportWizard({ open, onOpenChange }: ImportWizardProps) {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="text-to-image">Text to Image</SelectItem>
+                    <SelectItem value="image-to-image">Image to Image</SelectItem>
                     <SelectItem value="text-to-video">Text to Video</SelectItem>
                     <SelectItem value="image-to-video">Image to Video</SelectItem>
+                    <SelectItem value="text-to-music">Text to Music</SelectItem>
+                    <SelectItem value="music-to-music">Music to Music</SelectItem>
                   </SelectContent>
                 </Select>
                 {analysis?.suggestedCategory && (
